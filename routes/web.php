@@ -9,12 +9,13 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 
 Route::get('/', function () {
-    return Inertia::render('landing');
+    return inertia('Landing');
 });
+
 
 Route::get('/auth/google', function () {
     return Socialite::driver('google')->redirect();
-});
+})->name('google.redirect');
 
 Route::get('/auth/google/callback', function () {
     $googleUser = Socialite::driver('google')->user();
@@ -25,9 +26,12 @@ Route::get('/auth/google/callback', function () {
     );
 
     Auth::login($user);
+    if ($user->role === 'admin') {
+        return redirect('/admin');
+    }
 
-    return redirect('/dashboard');
-});
+    return redirect('dashboard');
+})->name('google.callback');
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
@@ -39,4 +43,4 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

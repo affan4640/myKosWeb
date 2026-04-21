@@ -1,10 +1,22 @@
-export default function landing() {
+import React, { useState } from "react";
+
+import Navbar from "../Landing/Navbar";
+import Home from "../Landing/Home";
+import WelcomeScreen from "../Landing/WelcomeScreen";
+
+export default function Landing() {
+  const [showWelcome, setShowWelcome] = useState(true);
+
   return (
     <div>
-      <h1>Welcome Landing Page</h1>
-      <a href="/login">Login</a> <br />
-      <a href="/register">Register</a> <br />
-      <a href="/auth/google">Login with Google</a>
+      {showWelcome ? (
+        <WelcomeScreen onFinish={() => setShowWelcome(false)} />
+      ) : (
+        <>
+          <Navbar />
+          <Home />
+        </>
+      )}
     </div>
   );
 }
