@@ -4,18 +4,20 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Review extends Model
+class Complaint extends Model
 {
     protected $fillable = [
-        'user_id',
+        'tenant_id',
         'property_id',
         'contract_id',
-        'rating_id',
-        'comment'
+        'title',
+        'description',
+        'image',
+        'status'
     ];
 
-    public function user() {
-        return $this->belongsTo(User::class);
+    public function tenant() {
+        return $this->belongsTo(User::class, 'tenant_id');
     }
 
     public function property() {
