@@ -6,5 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class PropertyImage extends Model
 {
-    //
+    protected $fillable = [
+        'property_id',
+        'imagee_path'
+    ];
+
+    public function property() {
+        return $this->belongsTo(Property::class);
+    }
 }
