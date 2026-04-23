@@ -10,41 +10,35 @@ const Navbar = () => {
     const navItems = [
         { href: "#Home", label: "Home" },
         { href: "#About", label: "About" },
+        { href: "#Showcase", label: "Showcase" },
         { href: "#Contact", label: "Contact" },
     ];
 
     useEffect(() => {
-        const handleScroll = () => {
-            setScrolled(window.scrollY > 20);
+    const handleScroll = () => {
+        setScrolled(window.scrollY > 20);
 
-            const sections = navItems
-                .map((item) => {
-                    const section = document.querySelector(item.href);
-                    if (section) {
-                        return {
-                            id: item.href.replace("#", ""),
-                            offset: section.offsetTop - 200,
-                            height: section.offsetHeight,
-                        };
-                    }
-                    return null;
-                })
-                .filter(Boolean);
+        let currentSection = "Home";
 
-            const current = window.scrollY;
+        navItems.forEach((item) => {
+            const section = document.querySelector(item.href);
+            if (!section) return;
 
-            const active = sections.find(
-                (s) => current >= s.offset && current < s.offset + s.height,
-            );
+            const rect = section.getBoundingClientRect();
 
-            if (active) setActiveSection(active.id);
-        };
+            if (rect.top <= 150 && rect.bottom >= 150) {
+                currentSection = item.href.replace("#", "");
+            }
+        });
 
-        window.addEventListener("scroll", handleScroll);
-        handleScroll();
+        setActiveSection(currentSection);
+    };
 
-        return () => window.removeEventListener("scroll", handleScroll);
-    }, []);
+    window.addEventListener("scroll", handleScroll);
+    handleScroll();
+
+    return () => window.removeEventListener("scroll", handleScroll);
+}, []);
 
     useEffect(() => {
         document.body.style.overflow = isOpen ? "hidden" : "unset";
@@ -68,32 +62,27 @@ const Navbar = () => {
         <nav
             className={`fixed w-full top-0 z-50 transition-all duration-500 ${
                 isOpen
-                    ? "bg-background"
+                    ? "bg-[#ECF4E8]"
                     : scrolled
-                      ? "bg-background/80 backdrop-blur-xl shadow-sm"
-                      : "bg-transparent"
+                    ? "bg-[#ECF4E8]/80 backdrop-blur-xl shadow-sm"
+                    : "bg-transparent"
             }`}
         >
-            <div className="mx-auto px-[8%] lg:px-[16%]">
+            <div className="mx-auto px-[5%] lg:px-[10%]">
                 <div className="flex items-center justify-between h-16">
-                    {/* LOGO */}
+
                     <a
                         href="#Home"
                         onClick={(e) => scrollToSection(e, "#Home")}
-                        className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent"
+                        className="flex items-center gap-2"
                     >
-                        <div className="flex items-center gap-2">
-                            <img
-                                src={logo}
-                                alt="MyKost"
-                                className="w-12 h-12"
-                            />
-                        </div>
+                        <img src={logo} alt="MyKos" className="w-10 h-10" />
+                        <span className="bg-gradient-to-r from-[#93BFC7] to-[#ABE7B2] bg-clip-text text-transparent">
+                            MyKost
+                        </span>
                     </a>
 
-                    {/* DESKTOP */}
                     <div className="hidden md:flex items-center space-x-8">
-                        {/* MENU */}
                         {navItems.map((item) => {
                             const active =
                                 activeSection === item.href.substring(1);
@@ -110,15 +99,15 @@ const Navbar = () => {
                                     <span
                                         className={`transition ${
                                             active
-                                                ? "text-primary font-semibold"
-                                                : "text-gray-600 group-hover:text-primary"
+                                                ? "text-[#2f3e46] font-semibold"
+                                                : "text-gray-600 group-hover:text-[#2f3e46]"
                                         }`}
                                     >
                                         {item.label}
                                     </span>
 
                                     <span
-                                        className={`absolute left-0 bottom-0 h-[2px] w-full bg-gradient-to-r from-primary to-secondary transform origin-left transition ${
+                                        className={`absolute left-0 bottom-0 h-[2px] w-full bg-[#ABE7B2] transform origin-left transition ${
                                             active
                                                 ? "scale-x-100"
                                                 : "scale-x-0 group-hover:scale-x-100"
@@ -128,31 +117,26 @@ const Navbar = () => {
                             );
                         })}
 
-                        {/* LOGIN BUTTON */}
-                        <a href={route('login')}>
+                        <a href={route("login")}>
                             <div className="relative group">
-                                {/* BORDER GLOW */}
-                                <div className="absolute -inset-[1px] rounded-lg bg-gradient-to-r from-primary to-secondary opacity-60 group-hover:opacity-100 blur-sm transition"></div>
+                                <div className="absolute -inset-[1px] rounded-lg bg-[#ABE7B2] opacity-50 blur-sm group-hover:opacity-100 transition"></div>
 
-                                {/* BUTTON */}
-                                <div className="relative px-4 py-2 rounded-lg bg-background text-sm font-medium text-gray-700 border border-transparent group-hover:text-primary transition">
+                                <div className="relative px-4 py-2 rounded-lg bg-white text-sm font-medium text-gray-700 group-hover:text-black transition">
                                     Login
                                 </div>
                             </div>
                         </a>
                     </div>
 
-                    {/* MOBILE BUTTON */}
                     <button
                         onClick={() => setIsOpen(!isOpen)}
-                        className="md:hidden text-gray-700"
+                        className="md:hidden text-[#2f3e46]"
                     >
                         {isOpen ? <X /> : <Menu />}
                     </button>
                 </div>
             </div>
 
-            {/* MOBILE MENU */}
             <div
                 className={`md:hidden transition-all duration-300 ${
                     isOpen
@@ -160,7 +144,7 @@ const Navbar = () => {
                         : "max-h-0 opacity-0 overflow-hidden"
                 }`}
             >
-                <div className="px-6 py-6 space-y-4 bg-background">
+                <div className="px-6 py-6 space-y-4 bg-[#ECF4E8]">
                     {navItems.map((item, i) => (
                         <a
                             key={item.label}
@@ -168,7 +152,7 @@ const Navbar = () => {
                             onClick={(e) => scrollToSection(e, item.href)}
                             className={`block text-lg transition ${
                                 activeSection === item.href.substring(1)
-                                    ? "text-primary font-semibold"
+                                    ? "text-[#2f3e46] font-semibold"
                                     : "text-gray-600"
                             }`}
                             style={{
@@ -178,7 +162,11 @@ const Navbar = () => {
                             {item.label}
                         </a>
                     ))}
-                    <a href="#login" className="block text-lg text-gray-600">
+
+                    <a
+                        href={route("login")}
+                        className="block text-lg text-gray-700"
+                    >
                         Login
                     </a>
                 </div>

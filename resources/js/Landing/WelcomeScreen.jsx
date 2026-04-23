@@ -10,7 +10,6 @@ import { Home, Globe, User, GitBranch } from "lucide-react";
 import logo from "../../assets/logo.png";
 
 export default function WelcomeScreen({ onFinish }) {
-  // 🎯 PARALLAX
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
@@ -25,10 +24,8 @@ export default function WelcomeScreen({ onFinish }) {
     };
 
     window.addEventListener("mousemove", move);
-
-    // ⏱️ TIMER → pindah ke Home
     const timer = setTimeout(() => {
-      onFinish(); // 🔥 trigger ke Landing.jsx
+      onFinish(); 
     }, 3000);
 
     return () => {
@@ -50,7 +47,6 @@ export default function WelcomeScreen({ onFinish }) {
         }}
         transition={{ duration: 0.8 }}
       >
-        {/* 🌌 PARALLAX BACKGROUND */}
         <motion.div
           style={{ x: smoothX, y: smoothY }}
           className="absolute inset-0"
@@ -58,14 +54,12 @@ export default function WelcomeScreen({ onFinish }) {
           <div className="absolute inset-0 bg-gradient-to-r from-primary/30 to-secondary/30 blur-3xl" />
         </motion.div>
 
-        {/* ✨ CURSOR GLOW */}
         <motion.div
           className="pointer-events-none absolute w-72 h-72 rounded-full bg-primary/20 blur-3xl"
           style={{ x: mouseX, y: mouseY }}
         />
 
         <div className="relative text-center px-6 max-w-3xl">
-          {/* 🚀 ICON */}
           <div className="flex justify-center gap-8 mb-12">
             {[Home, User, GitBranch].map((Icon, i) => (
               <motion.div
@@ -86,7 +80,6 @@ export default function WelcomeScreen({ onFinish }) {
             ))}
           </div>
 
-          {/* 🧩 LOGO */}
           <motion.img
             src={logo}
             alt="Logo"
@@ -97,7 +90,6 @@ export default function WelcomeScreen({ onFinish }) {
             transition={{ duration: 1 }}
           />
 
-          {/* 🌐 FOOTER */}
           <motion.div
             className="mt-10"
             initial={{ opacity: 0 }}
@@ -107,7 +99,7 @@ export default function WelcomeScreen({ onFinish }) {
             <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-background/40 border border-secondary/20 backdrop-blur">
               <Globe className="text-primary w-5 h-5" />
               <span className="text-sm text-gray-600">
-                Copyright © 2026 MyKosTeam All Right Reserved.
+                Copyright © 2026 MyKosTeam All Rights Reserved.
               </span>
             </div>
           </motion.div>
