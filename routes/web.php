@@ -27,10 +27,10 @@ Route::get('/auth/google/callback', function () {
 
     Auth::login($user);
     if ($user->role === 'admin') {
-        return redirect('/admin');
+        return redirect('/dashboard');
     }
 
-    return redirect('dashboard');
+    return redirect('/');
 })->name('google.callback');
 
 Route::get('/dashboard', function () {

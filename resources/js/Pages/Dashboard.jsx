@@ -1,26 +1,22 @@
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head } from '@inertiajs/react';
+import AdminLayout from "../Admin/AdminLayout";
+import Card from "../components/Card";
+import TableUsers from "../components/TableUsers";
+
+const users = [
+    { id: 1, name: "Eki", email: "eki@mail.com", role: "Admin" },
+    { id: 2, name: "Budi", email: "budi@mail.com", role: "User" },
+];
 
 export default function Dashboard() {
     return (
-        <AuthenticatedLayout
-            header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Dashboard
-                </h2>
-            }
-        >
-            <Head title="Dashboard" />
-
-            <div className="py-12">
-                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                    <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                        <div className="p-6 text-gray-900">
-                            You're logged in!
-                        </div>
-                    </div>
-                </div>
+        <AdminLayout>
+            <div className="grid md:grid-cols-3 gap-6">
+                <Card title="Total Users" value="120" />
+                <Card title="Active Kos" value="45" />
+                <Card title="Bookings" value="320" />
             </div>
-        </AuthenticatedLayout>
+
+            <TableUsers users={users} />
+        </AdminLayout>
     );
 }
