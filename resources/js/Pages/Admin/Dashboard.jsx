@@ -1,12 +1,8 @@
-import AdminLayout from "../Layouts/AdminLayout";
-import Card from "../Components/Admin/Card";
-import Charts from "../Components/Admin/Charts";
-import Activity from "../Components/Admin/Activity";
+import AdminLayout from "../../Layouts/AdminLayout";
+import Card from "../../Components/Admin/Card";
+import Charts from "../../Components/Admin/Charts";
+import Activity from "../../Components/Admin/Activity";
 
-const users = [
-    { id: 1, name: "Eki", email: "eki@mail.com", role: "Admin" },
-    { id: 2, name: "Budi", email: "budi@mail.com", role: "User" },
-];
 
 export default function Dashboard() {
     return (

@@ -28,6 +28,7 @@
         "@mui/material": "^9.0.0",
         "aos": "^2.3.4",
         "framer-motion": "^12.38.0",
-        "lucide-react": "^1.8.0"
+        "lucide-react": "^1.8.0",
+        "recharts": "^3.8.1"
     }
 }

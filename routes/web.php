@@ -27,7 +27,7 @@ Route::get('/auth/google/callback', function () {
 
     Auth::login($user);
     if ($user->role === 'admin') {
-        return redirect('/dashboard');
+        return redirect('admin/dashboard');
     }
 
     return redirect('/');
@@ -44,3 +44,27 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__ . '/auth.php';
+
+Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
+
+    Route::get('/dashboard', function () {
+        return Inertia::render('Dashboard');
+    })->name('admin.dashboard');
+
+    Route::get('/users', function () {
+        return Inertia::render('Admin/Users');
+    })->name('admin.users');
+
+    Route::get('/kos', function () {
+        return Inertia::render('Admin/Kos');
+    })->name('admin.kos');
+
+    Route::get('/booking', function () {
+        return Inertia::render('Admin/Booking');
+    })->name('admin.booking');
+
+    Route::get('/settings', function () {
+        return Inertia::render('Admin/Settings');
+    })->name('admin.settings');
+
+});
