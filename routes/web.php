@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UserController;
+use App\Http\Middleware\AdminMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -33,10 +35,6 @@ Route::get('/auth/google/callback', function () {
     return redirect('/');
 })->name('google.callback');
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -45,15 +43,13 @@ Route::middleware('auth')->group(function () {
 
 require __DIR__ . '/auth.php';
 
-Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
+Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->group(function () {
 
     Route::get('/dashboard', function () {
         return Inertia::render('Dashboard');
     })->name('admin.dashboard');
 
-    Route::get('/users', function () {
-        return Inertia::render('Admin/Users');
-    })->name('admin.users');
+    Route::get('/users', [UserController::class, 'index'])->name('admin.users');
 
     Route::get('/kos', function () {
         return Inertia::render('Admin/Kos');

@@ -13,8 +13,9 @@ export default function TableUsers({ users }) {
                     {/* HEADER */}
                     <thead className="text-gray-400 text-sm border-b border-white/10 bg-white/5">
                         <tr>
-                            <th className="p-4 text-left">User</th>
+                            <th className="p-4 text-left">Name</th>
                             <th className="p-4 text-left">Email</th>
+                            <th className="p-4 text-left">Phone</th>
                             <th className="p-4 text-left">Role</th>
                             <th className="p-4 text-right">Action</th>
                         </tr>
@@ -24,7 +25,7 @@ export default function TableUsers({ users }) {
                     <tbody>
                         {users.length > 0 ? (
                             users.map((user) => {
-                                const isAdmin = user.role === "Admin";
+                                const isAdmin = user.role === "admin";
 
                                 return (
                                     <tr
@@ -44,6 +45,11 @@ export default function TableUsers({ users }) {
                                         {/* EMAIL */}
                                         <td className="p-4 text-gray-400 text-sm">
                                             {user.email}
+                                        </td>
+
+                                        {/* Phone */}
+                                        <td className="p-4 text-gray-400 text-sm">
+                                            {user.phone}
                                         </td>
 
                                         {/* ROLE */}
@@ -77,7 +83,7 @@ export default function TableUsers({ users }) {
                         ) : (
                             /* EMPTY STATE */
                             <tr>
-                                <td colSpan="4" className="text-center py-10 text-gray-500">
+                                <td colSpan="5" className="text-center py-10 text-gray-500">
                                     Tidak ada data user
                                 </td>
                             </tr>
