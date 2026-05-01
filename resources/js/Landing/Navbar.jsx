@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import logo from "../../assets/logo.png";
+import { Link } from "@inertiajs/react";
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -136,6 +137,15 @@ const Navbar = () => {
                     </button>
                 </div>
             </div>
+
+            <Link
+                                                        href={route('logout')}
+                                                        method="post"
+                                                        as="button"
+                                                        className="w-full text-left px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 transition"
+                                                    >
+                                                        Logout
+                                                    </Link>
 
             <div
                 className={`md:hidden transition-all duration-300 ${
