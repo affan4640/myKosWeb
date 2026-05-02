@@ -17,7 +17,6 @@ export default function AdminLayout({ children }) {
     return (
         <div className="flex h-screen bg-[#0b0b1a] text-white overflow-hidden">
 
-            {/* OVERLAY MOBILE */}
             {sidebarOpen && (
                 <div
                     className="fixed inset-0 bg-black/50 z-40 md:hidden"
@@ -25,10 +24,8 @@ export default function AdminLayout({ children }) {
                 />
             )}
 
-            {/* SIDEBAR */}
             <Sidebar open={sidebarOpen} setOpen={setSidebarOpen} />
 
-            {/* MAIN */}
             <div className="flex-1 flex flex-col">
 
                 <Topbar setOpen={setSidebarOpen} />

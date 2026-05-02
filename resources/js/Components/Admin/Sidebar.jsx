@@ -21,7 +21,7 @@ const menuSections = [
         items: [
             { name: "Users", icon: Users, href: "/admin/users" },
             { name: "Kos", icon: Home, href: "/admin/kos" },
-            { name: "Booking", icon: ClipboardList, href: "/admin/booking" },
+            { name: "Transaksi", icon: ClipboardList, href: "/admin/transaksi" },
         ],
     },
     {
