@@ -55,12 +55,34 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->group(functio
         return Inertia::render('Admin/Kos');
     })->name('admin.kos');
 
-    Route::get('/booking', function () {
-        return Inertia::render('Admin/Booking');
-    })->name('admin.booking');
+    Route::get('/transaksi', function () {
+        return Inertia::render('Admin/Transaksi');
+    })->name('admin.transaksi');
 
     Route::get('/settings', function () {
         return Inertia::render('Admin/Settings');
     })->name('admin.settings');
+
+});
+
+Route::get('/search', function () {
+    return Inertia::render('Search');
+})->name('search');
+
+Route::get('/DetailKos', function () {
+    return Inertia::render('DetailKos');
+})->name('detail.kos');
+
+Route::middleware('auth')->group(function () {
+
+    Route::get('/profile', function () {
+        return Inertia::render('Profile');
+    })->name('profile');
+
+    Route::post('/profile/update', [ProfileController::class, 'update'])
+        ->name('profile.update');
+
+    Route::post('/profile/password', [ProfileController::class, 'updatePassword'])
+        ->name('profile.password');
 
 });
