@@ -12,12 +12,16 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\KosController;
 use App\Http\Controllers\Admin\DashboardController;
+
 use App\Http\Controllers\Owner\OwnerComplaintController;
 use App\Http\Controllers\Owner\OwnerDashboardController;
 use App\Http\Controllers\WishlistController;
 use App\Models\Review;
 use App\Models\Property;
 use Illuminate\Http\Request;
+
+use App\Http\Controllers\ChatController;
+
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Socialite\Facades\Socialite;
@@ -118,9 +122,19 @@ Route::middleware(['auth', 'verified', 'owner'])->prefix('owner')->group(functio
         'tenants'
     ])->name('owner.tenants');
 
-    Route::get('/owner/messages', function () {
-        return Inertia::render('Owner/Messages');
-    })->name('owner.messages');
+    Route::get('/messages', [
+        ChatController::class, 'index'
+    ])->name('owner.messages');
+
+    Route::get('/messages/{id}', [
+    ChatController::class,
+    'getMessages'
+]);
+
+Route::post('/messages/send', [
+    ChatController::class,
+    'sendMessage'
+]);
 
     Route::get('/property/detail/{id}', [
         PropertyController::class,
