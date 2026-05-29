@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\WishlistController;
 use App\Http\Controllers\Api\RentalRequestController;
 use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\ReviewController;
+use App\Http\Controllers\Api\ComplaintController;
 
 Route::get('/auth/google/mobile', [AuthController::class, 'redirectToGoogle']);
 Route::get('/auth/google/mobile/callback', [AuthController::class, 'handleGoogleCallback']);
@@ -34,6 +35,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/wishlists/check/{propertyId}', [WishlistController::class, 'check']);
 
     Route::post('/rental-requests', [RentalRequestController::class, 'store']);
+    Route::get('/rental-requests', [RentalRequestController::class, 'index']);
+    Route::get('/rental-requests/{id}', [RentalRequestController::class, 'show']);
 
     Route::get('/conversations', [ChatController::class, 'getConversations']);
     Route::get('/conversations/{id}/messages', [ChatController::class, 'getMessages']);
@@ -42,4 +45,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('conversations/{id}', [ChatController::class, 'deleteConversation']);
 
     Route::post('/reviews', [ReviewController::class, 'store']);
+
+    Route::get('/complaints', [ComplaintController::class, 'index']);
+    Route::post('/complaints', [ComplaintController::class, 'store']);
+    Route::put('/complaints/{id}', [ComplaintController::class, 'update']);
 });
