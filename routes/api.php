@@ -40,18 +40,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/rental-requests', [RentalRequestController::class, 'index']);
     Route::get('/rental-requests/{id}', [RentalRequestController::class, 'show']);
 
-    Route::post(
-        '/invoice/{invoice}/pay',
-        [PaymentController::class, 'createInvoice']
-    );
-
-});
-
-Route::post(
-    '/xendit/callback',
-    [PaymentController::class, 'callback']
-);
-
     Route::get('/conversations', [ChatController::class, 'getConversations']);
     Route::get('/conversations/{id}/messages', [ChatController::class, 'getMessages']);
     Route::post('/conversations/create', [ChatController::class, 'createOrGetConversation']);
@@ -63,4 +51,14 @@ Route::post(
     Route::get('/complaints', [ComplaintController::class, 'index']);
     Route::post('/complaints', [ComplaintController::class, 'store']);
     Route::put('/complaints/{id}', [ComplaintController::class, 'update']);
+
+    Route::post(
+        '/invoice/{invoice}/pay',
+        [PaymentController::class, 'createInvoice']
+    );
 });
+
+Route::post(
+    '/xendit/callback',
+    [PaymentController::class, 'callback']
+);
