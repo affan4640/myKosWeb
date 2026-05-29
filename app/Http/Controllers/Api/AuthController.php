@@ -27,9 +27,8 @@ class AuthController extends Controller
             return response()->json(['message' => 'Email atau password salah'], 401);
         }
 
-        $user->tokens()->delete();
-
-        $token = $user->createToken('flutter-app')->plainTextToken;
+        $deviceName = $request->header('User-Agent', 'flutter-app');
+        $token = $user->createToken($deviceName)->plainTextToken;
 
         return response()->json([
             'message' => 'Login berhasil',
@@ -201,9 +200,8 @@ class AuthController extends Controller
             ]
         );
 
-        $user->tokens()->delete();
-
-        $token  = $user->createToken('flutter-app')->plainTextToken;
+        $deviceName = $request->header('User-Agent', 'flutter-app');
+        $token  = $user->createToken($deviceName)->plainTextToken;
         $params = http_build_query([  
             'token' => $token,
             'name'  => $user->name,
@@ -225,6 +223,31 @@ class AuthController extends Controller
             'phone'  => $request->user()->phone,
             'avatar' => $this->avatarUrl($request->user()->avatar),
         ]);
+    }
+
+    public function getTokens(Request $request)
+    {
+        $tokens = $request->user()->tokens->map(function ($token) use ($request) {
+            return [
+                'id' => $token->id,
+                'name' => $token->name,
+                'last_used_at' => $token->last_used_at ? $token->last_used_at->format('Y-m-d H:i:s') : null,
+                'created_at' => $token->created_at->format('Y-m-d H:i:s'),
+                'is_current' => $token->id === $request->user()->currentAccessToken()->id,
+            ];
+        });
+
+        return response()->json(['data' => $tokens]);
+    }
+
+    public function revokeToken(Request $request, $id)
+    {
+        $token = $request->user()->tokens()->where('id', $id)->first();
+        if ($token) {
+            $token->delete();
+            return response()->json(['message' => 'Akses perangkat berhasil dicabut']);
+        }
+        return response()->json(['message' => 'Perangkat tidak ditemukan'], 404);
     }
 
     public function logout(Request $request)

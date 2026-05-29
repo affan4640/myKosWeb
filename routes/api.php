@@ -22,6 +22,8 @@ Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/user/devices', [AuthController::class, 'getTokens']);
+    Route::delete('/user/devices/{id}', [AuthController::class, 'revokeToken']);
     Route::put('/profile', [AuthController::class, 'updateProfile']);
 
 
