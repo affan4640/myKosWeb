@@ -12,10 +12,15 @@ class Invoice extends Model
         'due_date',
         'midtrans_order_id',
         'snap_token',
-        'status'
+        'status',
+        'external_id',
+        'xendit_invoice_id',
+        'invoice_url',
+        'expired_at',
+        'payment_method'
     ];
 
-    public function contracts() {
+    public function contract() {
         return $this->belongsTo(Contract::class);
     }
 

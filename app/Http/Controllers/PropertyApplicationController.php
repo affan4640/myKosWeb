@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Property;
 use App\Models\PropertyImage;
 use App\Models\User;
+use App\Models\Wallet;
 use Illuminate\Http\Request;
 use App\Models\PropertyApplication;
 use App\Models\PropertyApplicationImage;
@@ -215,6 +216,11 @@ class PropertyApplicationController extends Controller
                 'title'   => 'Pengajuan Disetujui',
                 'message' => "Pengajuan kos \"{$application->name}\" telah disetujui. Kamu sekarang bisa mengelola kos.",
                 'is_read' => false,
+            ]);
+
+            Wallet::create([
+                'user_id' => $application->user_id,
+                'balance' => 0
             ]);
         } else {
             $application->update([

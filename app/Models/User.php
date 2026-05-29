@@ -62,4 +62,18 @@ class User extends Authenticatable
     public function verifiedPayments() {
         return $this-> hasMany(Payment::class, 'verified_by');
     }
+
+    public function wallet() {
+        return $this->hasOne(Wallet::class);
+    }
+
+    public function bankAccounts()
+{
+    return $this->hasMany(BankAccount::class);
+}
+
+public function withdrawals()
+{
+    return $this->hasMany(Withdrawal::class);
+}
 }

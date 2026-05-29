@@ -77,6 +77,8 @@ const formatDuration = (rental) => {
 };
 
 export default function TableRental({ rentals = [] }) {
+
+    console.log(rentals);
     return (
         <div className="mt-8">
             <div
@@ -135,7 +137,7 @@ export default function TableRental({ rentals = [] }) {
                                     </td>
 
                                     <td className="p-4 text-sm text-kost-muted dark:text-mint-100/50">
-                                        {rental.roomType?.name || "-"}
+                                        {rental.room_type?.name || "-"}
                                     </td>
 
                                     <td className="p-4 text-sm text-kost-muted dark:text-mint-100/50">
@@ -153,7 +155,7 @@ export default function TableRental({ rentals = [] }) {
                                     <td className="p-4">
                                         <div className="flex justify-end">
                                             <Link
-                                                href={`/owner/rental-request/${rental.id}`}
+                                                href={`/owner/rental-request/detail/${rental.id}`}
                                                 className="
                                                     inline-flex items-center gap-2
                                                     px-3 py-1.5 rounded-lg text-sm

@@ -1,5 +1,5 @@
 <?php
-
+use App\Http\Controllers\Api\PaymentController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\PropertyController;
@@ -51,4 +51,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/complaints', [ComplaintController::class, 'index']);
     Route::post('/complaints', [ComplaintController::class, 'store']);
     Route::put('/complaints/{id}', [ComplaintController::class, 'update']);
+
+    Route::post(
+        '/invoice/{invoice}/pay',
+        [PaymentController::class, 'createInvoice']
+    );
 });
+
+Route::post(
+    '/xendit/callback',
+    [PaymentController::class, 'callback']
+);

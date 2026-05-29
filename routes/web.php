@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\FacilityController;
+use App\Http\Controllers\Owner\OwnerPaymentController;
+use App\Http\Controllers\Owner\OwnerWalletController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PropertyApplicationController;
 use App\Http\Controllers\PropertyController;
@@ -15,6 +17,7 @@ use App\Http\Controllers\Admin\DashboardController;
 
 use App\Http\Controllers\Owner\OwnerComplaintController;
 use App\Http\Controllers\Owner\OwnerDashboardController;
+use App\Http\Controllers\WalletController;
 use App\Http\Controllers\WishlistController;
 use App\Models\Review;
 use App\Models\Property;
@@ -184,13 +187,9 @@ Route::post('/messages/send', [
         'edit'
     ])->name('owner.room-types.edit');
 
-    Route::get(
-        '/room-types/{property}',
-        [
-            RoomTypeController::class,
-            'index'
-        ]
-    )->name('owner.room-types');
+    Route::get('/room-types/{property}',[
+        RoomTypeController::class, 'index'
+    ])->name('owner.room-types');
 
     Route::put('/room-types/update/{id}', [
         RoomTypeController::class,
@@ -212,6 +211,14 @@ Route::post('/messages/send', [
         RentalRequestController::class,
         'index'
     ])->name('owner.rental-request');
+
+    Route::get('/rental-request/detail/{id}', [
+        RentalRequestController::class, 'edit'
+    ])->name('owner.rental-request.detail');
+
+    Route::put('/rental-request/update/{id}', [
+        RentalRequestController::class, 'update'
+    ])->name('owner.rental-request.update');
 
     Route::post('/notifications/mark-all-read', function () {
         \App\Models\Notification::where('user_id', auth()->id())
@@ -289,6 +296,30 @@ Route::post('/messages/send', [
 
     Route::patch('/complaints/{complaint}/status', [OwnerComplaintController::class, 'updateStatus'])
         ->name('complaints.status');
+
+    Route::get(
+            '/wallet',
+            [OwnerWalletController::class, 'index']
+        );
+
+        Route::post(
+            '/wallet/bank-account',
+            [OwnerWalletController::class, 'storeBankAccount']
+        );
+
+        Route::delete(
+            '/wallet/bank-account/{id}',
+            [OwnerWalletController::class, 'destroyBankAccount']
+        );
+
+        Route::post(
+            '/wallet/withdraw',
+            [OwnerWalletController::class, 'withdraw']
+        );
+
+    Route::get('/payments/{id}', [
+        OwnerPaymentController::class, 'index'
+    ])->name('owner.payments');
 });
 
 Route::post('/admin/notifications/mark-all-read', function () {

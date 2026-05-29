@@ -11,7 +11,11 @@ class Payment extends Model
         'proof_image',
         'paid_at',
         'verified_by',
-        'status'
+        'status',
+        'external_id',
+        'payment_method',
+        'payment_channel',
+        'paid_amount'
     ];
 
     public function invoice() {
