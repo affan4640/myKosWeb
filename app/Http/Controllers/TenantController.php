@@ -27,34 +27,34 @@ class TenantController extends Controller
         ]);
     }
 
-    public function tenants(Request $request)
+    public function tenants(Request $request, string $id)
     {
-        $propertyId = $request->property_id;
-
-        $search = $request->search;
-        $status = $request->status;
-
         $tenants = Contract::with([
                 'tenant',
                 'roomType',
             ])
-            ->whereHas('roomType', function ($query) use ($propertyId) {
+            ->whereHas('roomType', function ($query) use ($id) {
 
-                $query->where('property_id', $propertyId);
+                $query->where('property_id', $id);
 
             })
-            ->when($search, function ($query) use ($search) {
+            ->when($request->search, function ($query, $search) {
 
                 $query->whereHas('tenant', function ($q) use ($search) {
 
                     $q->where('name', 'like', "%{$search}%");
 
-                });
+                })
 
-            })
-            ->when($status, function ($query) use ($status) {
+                ->orWhereHas('roomType', function ($roomTypeQuery) use ($search) {
 
-                $query->where('status', $status);
+                $roomTypeQuery->where(
+                    'name',
+                    'like',
+                    "%{$search}%"
+                );
+
+            });
 
             })
             ->latest()
@@ -64,8 +64,7 @@ class TenantController extends Controller
         return Inertia::render('Owner/Tenants', [
             'tenants' => $tenants,
             'filters' => [
-                'search' => $search,
-                'status' => $status,
+                $request->only(['search'])
             ]
         ]);
     }

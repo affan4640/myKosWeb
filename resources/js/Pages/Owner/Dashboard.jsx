@@ -274,24 +274,22 @@ export default function Dashboard() {
                         icon={Home}
                     />
                     <StatCard
-                        title="Total Kamar"
-                        value={stats.totalRooms ?? 0}
-                        subtitle="Semua tipe kamar"
-                        icon={BedDouble}
-                    />
-                    <StatCard
                         title="Kamar Terisi"
                         value={`${stats.occupiedRooms ?? 0}/${stats.totalRooms ?? 0}`}
                         subtitle="Kontrak aktif"
                         icon={CheckCircle}
                     />
-                    {/* <StatCard
+                    <StatCard
                         title="Pendapatan Bulan Ini"
                         value={formatRupiah(stats.monthlyRevenue)}
-                        subtitle="Pembayaran diterima"
                         icon={Wallet}
                         accent
-                    /> */}
+                    />
+                    <StatCard
+                        title="Pendapatan Keseluruhan"
+                        value={formatRupiah(stats.totalRevenue)}
+                        icon={Wallet}
+                    />
                 </div>
 
                 {/* <div className="grid lg:grid-cols-3 gap-4">

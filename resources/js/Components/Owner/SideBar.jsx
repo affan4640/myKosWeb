@@ -70,6 +70,11 @@ const SidebarContent = ({ onClose }) => {
                     icon: Star,
                     href: `/owner/reviews/${activePropertyId}`,
                 },
+                {
+                    name: "Wallet",
+                    icon: Wallet,
+                    href: `/owner/wallet/`,
+                },
             ],
         },
         {

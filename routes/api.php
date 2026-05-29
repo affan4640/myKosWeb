@@ -1,4 +1,5 @@
 <?php
+use App\Http\Controllers\Api\PaymentController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\PropertyController;
@@ -35,7 +36,18 @@ Route::get('/wishlists/check/{propertyId}', [WishlistController::class, 'check']
 Route::post('/rental-requests',[RentalRequestController::class, 'store']);
 
 Route::post('/reviews', [ReviewController::class, 'store']);
+
+Route::post(
+        '/invoice/{invoice}/pay',
+        [PaymentController::class, 'createInvoice']
+    );
+
 });
+
+Route::post(
+    '/xendit/callback',
+    [PaymentController::class, 'callback']
+);
 
 Route::get('/conversations', [ChatController::class, 'getConversations']);
 Route::get('/conversations/{id}/messages', [ChatController::class, 'getMessages']);
