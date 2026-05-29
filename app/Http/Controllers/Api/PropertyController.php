@@ -126,6 +126,7 @@ class PropertyController extends Controller
                 ];
             }),
             'owner' => [
+                'id'    => $property->owner->id ?? null,
                 'name'  => $property->owner->name ?? '-',
                 'phone' => $property->owner->phone ?? '-',
             ],

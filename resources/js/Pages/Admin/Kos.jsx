@@ -1,7 +1,5 @@
 import { useState } from "react";
 import AdminLayout from "@/Layouts/AdminLayout";
-import TableKos from "@/Components/Admin/TableKos";
-import EditKosModal from "@/Components/Admin/EditKosModal";
 
 export default function Kos() {
 

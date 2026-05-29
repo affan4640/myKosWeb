@@ -54,4 +54,112 @@ class RentalRequestController extends Controller
             'data'    => $rentalRequest,
         ], 201);
     }
+
+    public function index(Request $request)
+    {
+        $requests = RentalRequest::with(['roomType.property.images'])
+            ->where('tenant_id', $request->user()->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json($requests->map(function ($r) {
+            $property = $r->roomType->property;
+            $image = $property->images->first();
+
+            $imageUrl = null;
+            if ($image) {
+                $imageUrl = str_starts_with($image->image_path, 'http')
+                    ? $image->image_path
+                    : asset('storage/' . $image->image_path);
+            }
+
+            $statusMap = [
+                'pending'  => ['label' => 'Menunggu',   'color' => 'orange'],
+                'approved' => ['label' => 'Disetujui',  'color' => 'green'],
+                'rejected' => ['label' => 'Ditolak',    'color' => 'red'],
+            ];
+            $statusInfo = $statusMap[$r->status] ?? ['label' => $r->status, 'color' => 'grey'];
+
+            return [
+                'id'             => $r->id,
+                'status'         => $r->status,
+                'status_label'   => $statusInfo['label'],
+                'status_color'   => $statusInfo['color'],
+                'start_date'     => $r->start_date,
+                'duration_value' => $r->duration_value,
+                'duration_type'  => $r->duration_type,
+                'note'           => $r->note,
+                'created_at'     => $r->created_at->format('d F Y'),
+                'property'       => [
+                    'id'        => $property->id,
+                    'name'      => $property->name,
+                    'address'   => $property->address,
+                    'city'      => $property->city,
+                    'image_url' => $imageUrl,
+                ],
+                'room_type' => [
+                    'id'           => $r->roomType->id,
+                    'name'         => $r->roomType->name,
+                    'price'        => $r->roomType->price,
+                    'rental_type'  => $r->roomType->rental_type,
+                ],
+            ];
+        }));
+    }
+
+    public function show(Request $request, $id)
+    {
+        $r = RentalRequest::with([
+            'roomType.property.images',
+            'roomType.property.owner',
+        ])
+        ->where('tenant_id', $request->user()->id)
+        ->findOrFail($id);
+
+        $property = $r->roomType->property;
+        $image = $property->images->first();
+
+        $imageUrl = null;
+        if ($image) {
+            $imageUrl = str_starts_with($image->image_path, 'http')
+                ? $image->image_path
+                : asset('storage/' . $image->image_path);
+        }
+
+        $statusMap = [
+            'pending'  => ['label' => 'Menunggu Persetujuan', 'color' => 'orange'],
+            'approved' => ['label' => 'Disetujui',            'color' => 'green'],
+            'rejected' => ['label' => 'Ditolak',              'color' => 'red'],
+        ];
+        $statusInfo = $statusMap[$r->status] ?? ['label' => $r->status, 'color' => 'grey'];
+
+        return response()->json([
+            'id'             => $r->id,
+            'status'         => $r->status,
+            'status_label'   => $statusInfo['label'],
+            'status_color'   => $statusInfo['color'],
+            'start_date'     => $r->start_date,
+            'duration_value' => $r->duration_value,
+            'duration_type'  => $r->duration_type,
+            'note'           => $r->note,
+            'created_at'     => $r->created_at->format('d F Y H:i'),
+            'property'       => [
+                'id'        => $property->id,
+                'name'      => $property->name,
+                'address'   => $property->address,
+                'city'      => $property->city,
+                'image_url' => $imageUrl,
+                'owner'     => [
+                    'name'  => $property->owner->name ?? '-',
+                    'phone' => $property->owner->phone ?? '-',
+                ],
+            ],
+            'room_type' => [
+                'id'          => $r->roomType->id,
+                'name'        => $r->roomType->name,
+                'price'       => $r->roomType->price,
+                'rental_type' => $r->roomType->rental_type,
+            ],
+        ]);
+    }
 }
