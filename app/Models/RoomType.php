@@ -38,4 +38,5 @@ class RoomType extends Model
     public function contracts() {
         return $this->hasMany(Contract::class);
     }
+
 }

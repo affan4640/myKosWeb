@@ -50,6 +50,12 @@ class PropertyController extends Controller
             $cheapestRoom = $property->roomTypes->sortBy('price')->first();
             $avgRating = $property->reviews->avg('rating');
 
+            $totalRooms = $property->roomTypes->sum('total_rooms');
+            $activeContracts = $property->roomTypes->sum(function ($room) {
+                return $room->contracts()->where('status', 'active')->count();
+            });
+            $isAvailable = ($totalRooms - $activeContracts) > 0;
+
             return [
                 'id'          => $property->id,
                 'name'        => $property->name,
@@ -62,8 +68,13 @@ class PropertyController extends Controller
                 'description' => $property->description,
                 'latitude'    => (float) ($property->latitude ?? 0),
                 'longitude'   => (float) ($property->longitude ?? 0),
+                'total_rooms'     => $totalRooms,
+                'active_contracts' => $activeContracts,
+                'is_available'    => $isAvailable,
             ];
         });
+
+
 
         return response()->json($data);
     }
@@ -100,7 +111,9 @@ class PropertyController extends Controller
                 fn($img) => $this->resolveImageUrl($img->image_path)
             ),
             'property_facilities' => $property->facilities->pluck('name'),
-            'room_types'          => $property->roomTypes->map(function ($room) use ($property) {
+            'room_types' => $property->roomTypes->map(function ($room) use ($property) {
+                $activeContracts = $room->contracts()->where('status', 'active')->count();
+                $availableRooms  = $room->total_rooms - $activeContracts;
                 return [
                     'id'              => $room->id,
                     'name'            => $room->name,
@@ -109,6 +122,9 @@ class PropertyController extends Controller
                     'length'          => $room->length ?? null,  // fix: size -> length
                     'capacity'        => $room->capacity,
                     'total_rooms'     => $room->total_rooms,
+                    'active_contracts' => $activeContracts,    
+                    'available_rooms'  => max(0, $availableRooms), 
+                    'is_available'     => $availableRooms > 0,     
                     'rental_type'     => $room->rental_type,
                     'type'            => $this->resolveType($property->type ?? 'campuran'), // fix
                     'room_facilities' => $room->facilities->pluck('name'),
