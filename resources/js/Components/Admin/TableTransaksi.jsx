@@ -1,3 +1,4 @@
+import { router } from "@inertiajs/react";
 import { Eye, Trash2, CreditCard, Home, CalendarDays, Wallet } from "lucide-react";
 
 const formatRupiah = (value) =>
@@ -11,16 +12,18 @@ const StatusBadge = ({ status }) => {
     const statusClass =
         status === "paid"
             ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20"
-            : status === "pending"
-              ? "bg-yellow-50 dark:bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-200 dark:border-yellow-500/20"
+            : status === "waiting_verification"
+            ? "bg-yellow-50 dark:bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-200 dark:border-yellow-500/20"
               : "bg-red-50 dark:bg-red-500/10 text-red-500 dark:text-red-400 border-red-200 dark:border-red-500/20";
 
     const label =
         status === "paid"
             ? "Lunas"
-            : status === "pending"
-              ? "Pending"
-              : "Gagal";
+            : status === "waiting_verification"
+            ? "Pending"
+            : status === "unpaid"
+            ? "Belum Dibayar"
+            : "Terlambat";
 
     return (
         <span
@@ -48,29 +51,18 @@ const UserAvatar = ({ name }) => (
     </div>
 );
 
-const ActionButton = ({ type = "detail", onClick }) => {
-    const isDelete = type === "delete";
-
+const ActionButton = ({ id }) => {
     return (
         <button
             type="button"
-            onClick={onClick}
+            onClick={() => router.get(route("admin.transactions.detail", id))}
             className={`
                 p-2 rounded-lg transition group
                 bg-mint-50 dark:bg-dark-bg
                 border border-mint-200 dark:border-dark-border/20
-                ${
-                    isDelete
-                        ? "hover:bg-red-50 dark:hover:bg-red-500/10 hover:border-red-200 dark:hover:border-red-500/20"
-                        : "hover:bg-mint-200 dark:hover:bg-mint-200/20 hover:border-mint-300 dark:hover:border-mint-300/30"
-                }
             `}
         >
-            {isDelete ? (
-                <Trash2 className="w-4 h-4 text-kost-muted dark:text-mint-100/40 group-hover:text-red-400" />
-            ) : (
-                <Eye className="w-4 h-4 text-kost-muted dark:text-mint-100/40 group-hover:text-kost-dark dark:group-hover:text-mint-50" />
-            )}
+            <Eye className="w-4 h-4 text-kost-muted dark:text-mint-100/40 group-hover:text-kost-dark dark:group-hover:text-mint-50" />
         </button>
     );
 };
@@ -91,7 +83,7 @@ export default function TableTransaksi({ transactions = [] }) {
                     <thead className="uppercase tracking-wider">
                         <tr className="border-b border-mint-200 dark:border-dark-border/20">
                             <th className="p-4 text-left text-xs font-medium text-kost-muted dark:text-mint-100/40">
-                                User
+                                Nama
                             </th>
                             <th className="p-4 text-left text-xs font-medium text-kost-muted dark:text-mint-100/40">
                                 Kos
@@ -125,24 +117,30 @@ export default function TableTransaksi({ transactions = [] }) {
                                 >
                                     <td className="p-4">
                                         <div className="flex items-center gap-3">
-                                            <UserAvatar name={trx.user?.name} />
+                                            <UserAvatar name={trx.contract.tenant.name} />
 
                                             <span className="text-sm font-medium text-kost-dark dark:text-mint-50 capitalize">
-                                                {trx.user?.name || "-"}
+                                                {trx.contract.tenant.name || "-"}
                                             </span>
                                         </div>
                                     </td>
 
                                     <td className="p-4 text-sm text-kost-muted dark:text-mint-100/50">
-                                        {trx.kos?.name || "-"}
+                                        {trx.contract.room_type.property.name || "-"}
                                     </td>
 
                                     <td className="p-4 text-sm text-kost-muted dark:text-mint-100/50">
-                                        {trx.date || "-"}
+                                        {trx.updated_at 
+                                        ? new Date(trx.updated_at).toLocaleDateString('id-ID', {
+                                            day: '2-digit',
+                                            month: 'long',
+                                            year: 'numeric',
+                                        })
+                                        : '-'}
                                     </td>
 
                                     <td className="p-4 text-sm text-kost-muted dark:text-mint-100/50">
-                                        {formatRupiah(trx.total)}
+                                        {formatRupiah(trx.amount)}
                                     </td>
 
                                     <td className="p-4">
@@ -151,8 +149,7 @@ export default function TableTransaksi({ transactions = [] }) {
 
                                     <td className="p-4">
                                         <div className="flex justify-end gap-2">
-                                            <ActionButton />
-                                            <ActionButton type="delete" />
+                                            <ActionButton id={trx.id} />
                                         </div>
                                     </td>
                                 </tr>
@@ -187,11 +184,11 @@ export default function TableTransaksi({ transactions = [] }) {
                         >
                             <div className="flex items-start justify-between gap-3 mb-3">
                                 <div className="flex items-center gap-3 min-w-0">
-                                    <UserAvatar name={trx.user?.name} />
+                                    <UserAvatar name={trx.contract.tenant.name} />
 
                                     <div className="min-w-0">
                                         <p className="text-sm font-medium text-kost-dark dark:text-mint-50 capitalize truncate">
-                                            {trx.user?.name || "-"}
+                                            {trx.contract.tenant.name || "-"}
                                         </p>
 
                                         <div className="mt-1">
@@ -201,8 +198,7 @@ export default function TableTransaksi({ transactions = [] }) {
                                 </div>
 
                                 <div className="flex items-center gap-1.5 flex-shrink-0">
-                                    <ActionButton />
-                                    <ActionButton type="delete" />
+                                    <ActionButton id={trx.id}/>
                                 </div>
                             </div>
 
@@ -210,18 +206,24 @@ export default function TableTransaksi({ transactions = [] }) {
                                 <div className="flex items-center gap-2 text-xs text-kost-muted dark:text-mint-100/50">
                                     <Home className="w-3.5 h-3.5 flex-shrink-0 text-mint-300" />
                                     <span className="truncate">
-                                        {trx.kos?.name || "-"}
+                                        {trx.contract.room_type.property.name || "-"}
                                     </span>
                                 </div>
 
                                 <div className="flex items-center gap-2 text-xs text-kost-muted dark:text-mint-100/50">
                                     <CalendarDays className="w-3.5 h-3.5 flex-shrink-0 text-mint-300" />
-                                    <span>{trx.date || "-"}</span>
+                                    <span>{trx.updated_at
+                                        ? new Date(trx.updated_at).toLocaleDateString('id-ID', {
+                                        day: '2-digit',
+                                        month: 'long',
+                                        year: 'numeric',
+                                    })
+                                    : '-'}</span>
                                 </div>
 
                                 <div className="flex items-center gap-2 text-xs text-kost-muted dark:text-mint-100/50">
                                     <Wallet className="w-3.5 h-3.5 flex-shrink-0 text-mint-300" />
-                                    <span>{formatRupiah(trx.total)}</span>
+                                    <span>{formatRupiah(trx.amount)}</span>
                                 </div>
                             </div>
                         </div>

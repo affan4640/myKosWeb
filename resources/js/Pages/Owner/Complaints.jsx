@@ -53,8 +53,8 @@ const ComplaintCard = ({ complaint }) => {
     const status = statusConfig[complaint.status] || statusConfig.pending;
 
     const updateStatus = (value) => {
-        router.patch(
-            route("owner.complaints.status", complaint.id),
+        router.put(
+            route('owner.complaints.status', complaint.id),
             { status: value },
             {
                 preserveScroll: true,
@@ -118,9 +118,9 @@ const ComplaintCard = ({ complaint }) => {
 
             <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-mint-200 dark:border-dark-border/20">
                 <button
-                    onClick={() => updateStatus("pending")}
+                    onClick={() => updateStatus("new")}
                     className={`px-3 py-1.5 rounded-lg text-xs border transition ${
-                        complaint.status === "pending"
+                        complaint.status === "new"
                             ? statusConfig.pending.className
                             : "bg-white dark:bg-dark-bg border-mint-200 dark:border-dark-border/20 text-kost-muted dark:text-mint-100/50 hover:bg-mint-50 dark:hover:bg-dark-card"
                     }`}
@@ -158,7 +158,7 @@ export default function Complaints({
     complaints = { data: [], links: [] },
     stats = {
         total: 0,
-        pending: 0,
+        new: 0,
         process: 0,
         done: 0,
     },
@@ -224,7 +224,7 @@ export default function Complaints({
                     />
                     <StatCard
                         title="Pending"
-                        value={stats.pending}
+                        value={stats.new}
                         icon={Clock}
                     />
                     <StatCard

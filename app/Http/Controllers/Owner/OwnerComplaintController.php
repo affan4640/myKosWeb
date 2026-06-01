@@ -40,7 +40,7 @@ class OwnerComplaintController extends Controller
 
         $stats = [
             'total' => Complaint::whereIn('property_id', $propertyIds)->count(),
-            'pending' => Complaint::whereIn('property_id', $propertyIds)->where('status', 'pending')->count(),
+            'new' => Complaint::whereIn('property_id', $propertyIds)->where('status', 'new')->count(),
             'process' => Complaint::whereIn('property_id', $propertyIds)->where('status', 'process')->count(),
             'done' => Complaint::whereIn('property_id', $propertyIds)->where('status', 'done')->count(),
         ];
@@ -55,7 +55,7 @@ class OwnerComplaintController extends Controller
     public function updateStatus(Request $request, Complaint $complaint)
     {
         $request->validate([
-            'status' => 'required|in:pending,process,done',
+            'status' => 'required|in:new,process,done',
         ]);
 
         $isOwner = Property::where('id', $complaint->property_id)

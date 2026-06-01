@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\FacilityController;
 use App\Http\Controllers\Owner\OwnerPaymentController;
 use App\Http\Controllers\Owner\OwnerWalletController;
@@ -77,9 +78,9 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->group(functio
         return Inertia::render('Admin/Kos');
     })->name('admin.kos');
 
-    Route::get('/transaksi', function () {
-        return Inertia::render('Admin/Transaksi');
-    })->name('admin.transaksi');
+    Route::get('/transaksi', [PaymentController::class, 'index'])->name('admin.transaksi');
+
+    Route::get('/transactions/{id}', [PaymentController::class, 'detail'])->name('admin.transactions.detail');
 
     Route::put('/users/{user}/role', [UserController::class, 'updateRole'])
         ->name('admin.users.updateRole');
@@ -292,10 +293,10 @@ Route::post('/messages/send', [
     })->name('owner.reviews.index');
 
     Route::get('/complaints', [OwnerComplaintController::class, 'index'])
-        ->name('complaints.index');
+        ->name('owner.complaints.index');
 
-    Route::patch('/complaints/{complaint}/status', [OwnerComplaintController::class, 'updateStatus'])
-        ->name('complaints.status');
+    Route::put('/complaints/{complaint}/status', [OwnerComplaintController::class, 'updateStatus'])
+        ->name('owner.complaints.status');
 
     Route::get(
             '/wallet',

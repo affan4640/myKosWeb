@@ -16,7 +16,7 @@ class FacilityController extends Controller
         $facilities = Facility::query()
         ->when($request->search, function ($query, $search) {
             $query->where('name', 'like', "%{$search}%");
-        })->paginate(10)->withQueryString();
+        })->latest()->paginate(10)->withQueryString();
 
         return Inertia::render('Admin/Facilities' , [
             'facilities' => $facilities,

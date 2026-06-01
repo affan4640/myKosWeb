@@ -15,7 +15,7 @@ export default function Dashboard({ stats,chartData, activities }) {
             <div className="grid md:grid-cols-3 gap-6 mb-8">
                 <Card title="Users" value={stats.users} />
                 <Card title="Kos Listed" value={stats.kos} />
-                <Card title="Bookings" value={stats.contracts} />
+                <Card title="Bookings" value={stats.bookings} />
             </div>
 
             <div className="grid lg:grid-cols-3 gap-6 mb-8">

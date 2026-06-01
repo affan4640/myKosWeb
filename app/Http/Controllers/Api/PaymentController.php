@@ -60,69 +60,73 @@ class PaymentController extends Controller
     }
 
     public function callback(Request $request)
-{
-    // 1. Bungkus dari awal proses pencarian sampai selesai
-    try {
-        $token = $request->header('x-callback-token');
+    {
+        try {
+            $token = $request->header('x-callback-token');
 
-        if ($token !== config('services.xendit.webhook_token')) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-
-        $invoice = Invoice::where('external_id', $request->external_id)->first();
-
-        if (!$invoice) {
-            return response()->json(['message' => 'Invoice not found'], 404);
-        }
-
-        DB::transaction(function () use($request, $invoice) {
-            if ($request->status === 'PAID') {
-
-                $invoice->update(['status' => 'paid']);
-
-                Payment::create([
-                    'invoice_id' => $invoice->id,
-                    'paid_at' => now(),
-                    'status' => 'paid',
-                    'external_id' => $request->id,
-                    'payment_method' => $request->payment_method,
-                    'payment_channel' => $request->payment_channel,
-                    'paid_amount' => $request->paid_amount
-                ]);
-
-                // Pastikan nama relasi ini sudah sinkron (contract atau contracts)
-                $contract = $invoice->contract; 
-                $contract->update(['status' => 'active']);
-
-                // Pastikan rantai relasi ini tidak ada yang null atau typo
-                $owner = $contract->roomType->property->owner;
-
-                $wallet = Wallet::firstOrCreate(
-                    ['user_id' => $owner->id],
-                    ['balance' => 0]
-                );
-
-                $wallet->increment('balance', $invoice->amount);
+            if ($token !== config('services.xendit.webhook_token')) {
+                return response()->json(['message' => 'Unauthorized'], 403);
             }
 
-            if ($request->status === 'EXPIRED') {
-                $invoice->update([
-                    'status' => 'expired'
-                ]);
+            $invoice = Invoice::where('external_id', $request->external_id)->first();
 
-                $invoice->contract->update([
-                    'status' => 'cancelled'
-                ]);
+            if (!$invoice) {
+                return response()->json(['message' => 'Invoice not found'], 404);
             }
-        });
 
-        return response()->json(['success' => true]);
+            if (in_array($invoice->status, ['paid', 'expired'])) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Webhook duplikat diabaikan, transaksi sudah pernah diproses.'
+                ], 200); 
+            }
 
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => $e->getMessage()
-        ], 500);
+            DB::transaction(function () use($request, $invoice) {
+                if ($request->status === 'PAID') {
+
+                    $invoice->update(['status' => 'paid']);
+
+                    Payment::create([
+                        'invoice_id' => $invoice->id,
+                        'paid_at' => now(),
+                        'status' => 'paid',
+                        'external_id' => $request->id,
+                        'payment_method' => $request->payment_method,
+                        'payment_channel' => $request->payment_channel,
+                        'paid_amount' => $request->paid_amount
+                    ]);
+
+                    $contract = $invoice->contract; 
+                    $contract->update(['status' => 'active']);
+
+                    $owner = $contract->roomType->property->owner;
+
+                    $wallet = Wallet::firstOrCreate(
+                        ['user_id' => $owner->id],
+                        ['balance' => 0]
+                    );
+
+                    $wallet->increment('balance', $invoice->amount);
+                }
+
+                if ($request->status === 'EXPIRED') {
+                    $invoice->update([
+                        'status' => 'expired'
+                    ]);
+
+                    $invoice->contract->update([
+                        'status' => 'cancelled'
+                    ]);
+                }
+            });
+
+            return response()->json(['success' => true]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
-}
 }

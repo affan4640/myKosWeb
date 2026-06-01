@@ -19,7 +19,7 @@ class UserController extends Controller
                     ->orWhere('email', 'like', "{$search}")
                     ->orWhere('role', 'like', "{$search}")
                     ->orWhere('phone', 'like', "{$search}");
-            })->paginate(10)->withQueryString();
+            })->latest()->paginate(10)->withQueryString();
 
         return Inertia::render('Admin/Users', [
             'users' => $users,
