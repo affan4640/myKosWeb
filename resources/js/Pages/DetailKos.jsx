@@ -1,22 +1,8 @@
 import { useState, useEffect } from "react";
 import {
-    MapPin,
-    Star,
-    Wifi,
-    Car,
-    Snowflake,
-    ArrowLeft,
-    Heart,
-    MessageCircle,
-    Bath,
-    BedDouble,
-    Users,
-    CheckCircle,
-    ChevronLeft,
-    ChevronRight,
-    Share2,
-    Sun,
-    Moon,
+    MapPin, Star, Wifi, Car, Snowflake, ArrowLeft, Heart,
+    MessageCircle, Bath, BedDouble, Users, CheckCircle,
+    ChevronLeft, ChevronRight, Share2, Sun, Moon, LogIn,
 } from "lucide-react";
 import { router, Link, usePage } from "@inertiajs/react";
 import { MapContainer, Marker, Popup } from "react-leaflet";
@@ -25,66 +11,14 @@ import GoogleTileLayer from "@/Components/Map/GoogleTileLayer";
 import RoomTypeModal from "@/Components/Search/RoomTypeModal";
 import FlashAlert from "@/Components/FlashAlert";
 
-/* ================= FACILITY ICON MAP ================= */
 const FACILITY_ICONS = {
-    WiFi: <Wifi className="w-4 h-4" />,
-    Wifi: <Wifi className="w-4 h-4" />,
-    AC: <Snowflake className="w-4 h-4" />,
-    Parkir: <Car className="w-4 h-4" />,
-    "Kamar Mandi Dalam": <Bath className="w-4 h-4" />,
+    WiFi:                <Wifi      className="w-4 h-4" />,
+    Wifi:                <Wifi      className="w-4 h-4" />,
+    AC:                  <Snowflake className="w-4 h-4" />,
+    Parkir:              <Car       className="w-4 h-4" />,
+    "Kamar Mandi Dalam": <Bath      className="w-4 h-4" />,
 };
 
-/* ================= ROOM TYPE CARD ================= */
-const RoomTypeCard = ({ room, onBook }) => (
-    <div
-        className="
-        rounded-xl p-4
-        bg-mint-50       dark:bg-dark-bg
-        border border-mint-200 dark:border-dark-border/20
-        flex items-center justify-between gap-4
-    "
-    >
-        <div className="space-y-1">
-            <p className="text-sm font-medium text-kost-dark dark:text-mint-50">
-                {room.name}
-            </p>
-            <div className="flex items-center gap-3 text-xs text-kost-muted dark:text-mint-100/50">
-                {room.room_width && room.room_length && (
-                    <span className="flex items-center gap-1">
-                        <BedDouble className="w-3 h-3" />
-                        {room.room_width}×{room.room_length} m
-                    </span>
-                )}
-                {room.capacity && (
-                    <span className="flex items-center gap-1">
-                        <Users className="w-3 h-3" />
-                        {room.capacity} orang
-                    </span>
-                )}
-                <span
-                    className="
-                    px-2 py-0.5 rounded-full text-xs
-                    bg-mint-100 dark:bg-mint-200/10
-                    text-kost-dark dark:text-mint-100
-                    border border-mint-200 dark:border-mint-300/20
-                "
-                >
-                    {room.total_rooms} kamar
-                </span>
-            </div>
-        </div>
-        <div className="text-right flex-shrink-0">
-            <p className="text-sm font-medium text-kost-dark dark:text-mint-50">
-                Rp {Number(room.price).toLocaleString("id-ID")}
-            </p>
-            <p className="text-xs text-kost-muted dark:text-mint-100/40">
-                /{room.rental_type === "monthly" ? "bulan" : "hari"}
-            </p>
-        </div>
-    </div>
-);
-
-/* ================= RECOM CARD ================= */
 const RecomCard = ({ item }) => (
     <Link
         href={route("kos.detail", item.id)}
@@ -116,10 +50,7 @@ const RecomCard = ({ item }) => (
             </p>
             <div className="flex items-center justify-between pt-1">
                 <span className="text-xs font-medium text-kost-dark dark:text-mint-50">
-                    Rp{" "}
-                    {Number(item.room_types?.[0]?.price ?? 0).toLocaleString(
-                        "id-ID",
-                    )}
+                    Rp {Number(item.room_types?.[0]?.price ?? 0).toLocaleString("id-ID")}
                 </span>
                 {item.rating && (
                     <div className="flex items-center gap-0.5 text-yellow-500 text-xs">
@@ -132,16 +63,13 @@ const RecomCard = ({ item }) => (
     </Link>
 );
 
-/* ================= SECTION CARD ================= */
 const SectionCard = ({ title, children }) => (
-    <div
-        className="
+    <div className="
         rounded-2xl p-6
         bg-white        dark:bg-dark-card
         border border-mint-200 dark:border-dark-border/20
         space-y-4 transition-colors duration-300
-    "
-    >
+    ">
         {title && (
             <h2 className="text-sm font-medium text-kost-dark dark:text-mint-50">
                 {title}
@@ -151,56 +79,57 @@ const SectionCard = ({ title, children }) => (
     </div>
 );
 
-/* ================= MAIN ================= */
+const LoginPrompt = ({ text }) => (
+    <Link
+        href={route("login")}
+        className="
+            w-full py-2.5 rounded-xl text-sm transition
+            flex items-center justify-center gap-2
+            bg-mint-50 dark:bg-dark-bg
+            border border-mint-200 dark:border-dark-border/20
+            text-kost-muted dark:text-mint-100/50
+            hover:bg-mint-100 dark:hover:bg-dark-card
+            hover:text-kost-dark dark:hover:text-mint-50
+        "
+    >
+        <LogIn className="w-4 h-4" />
+        {text}
+    </Link>
+);
 
-export default function DetailKos({ property = null, similar = [] }) {
-    const images = property.images ?? [];
-    const roomTypes = property.room_types ?? [];
-    const facilities = property.facilities ?? [];
+export default function DetailKos({
+    property     = null,
+    similar      = [],
+    isWishlisted: initialWishlisted = false,
+}) {
+    const { auth } = usePage().props;
+    const isLoggedIn = !!auth?.user;
+
+    const images     = property?.images      ?? [];
+    const roomTypes  = property?.room_types  ?? [];
+    const facilities = property?.facilities  ?? [];
 
     const icon = createLocationIcon();
-    const [activeImage, setActiveImage] = useState(0);
-    const [isWishlisted, setIsWishlisted] = useState(property.wishlists.length > 0);
-    const [selectedRoom, setSelectedRoom] = useState(roomTypes[0] ?? null);
-    const [modalRoom, setModalRoom] = useState(null);
 
-    const [isDark, setIsDark] = useState(
-        () => localStorage.getItem("theme") === "dark",
+    const [activeImage,    setActiveImage]    = useState(0);
+    const [isWishlisted,   setIsWishlisted]   = useState(initialWishlisted);
+    const [wishlistLoading,setWishlistLoading]= useState(false);
+    const [selectedRoom,   setSelectedRoom]   = useState(roomTypes[0] ?? null);
+    const [modalRoom,      setModalRoom]      = useState(null);
+    const [isDark,         setIsDark]         = useState(
+        () => localStorage.getItem("theme") === "dark"
     );
 
-    const handleBook = (room) => {
-        setModalRoom(null);
-        router.visit(route("booking.create", { room_type_id: room.id }));
-    };
-
-    const toggleWishlist = () => {
-
-    setIsWishlisted(!isWishlisted);
-
-    router.post(route('wishlist.update', property), {
-        property_id: property.id
-    }, {
-        preserveScroll: true,
-
-        onSuccess: () => {
-            router.reload({
-                only: ['properties'],
-                preserveScroll: true,
-            });
-        },
-
-        onError: () => {
-
-            // rollback kalau gagal
-            setIsWishlisted(isWishlisted);
-        }
-    });
-
-}
+    if (!property) {
+        return (
+            <div className="min-h-screen bg-mint-50 dark:bg-dark-bg flex items-center justify-center">
+                <p className="text-sm text-kost-muted dark:text-mint-100/40">Memuat data kos...</p>
+            </div>
+        );
+    }
 
     useEffect(() => {
         const root = document.documentElement;
-
         if (isDark) {
             root.classList.add("dark");
             localStorage.setItem("theme", "dark");
@@ -210,31 +139,62 @@ export default function DetailKos({ property = null, similar = [] }) {
         }
     }, [isDark]);
 
-    const prevImage = () =>
-        setActiveImage((prev) => (prev - 1 + images.length) % images.length);
-    const nextImage = () =>
-        setActiveImage((prev) => (prev + 1) % images.length);
+    const prevImage = () => setActiveImage((p) => (p - 1 + images.length) % images.length);
+    const nextImage = () => setActiveImage((p) => (p + 1) % images.length);
 
-    const lowestPrice =
-        roomTypes.length > 0
-            ? Math.min(...roomTypes.map((r) => Number(r.price)))
-            : null;
+    const lowestPrice = roomTypes.length > 0
+        ? Math.min(...roomTypes.map((r) => Number(r.price)))
+        : null;
+
+    const handleWishlist = () => {
+        if (!isLoggedIn) {
+            router.visit(route("login"));
+            return;
+        }
+
+        setWishlistLoading(true);
+        const prev = isWishlisted;
+        setIsWishlisted(!prev); 
+
+        router.post(
+            route("wishlist.update"),
+            { property_id: property.id },
+            {
+                preserveScroll: true,
+                onError: () => setIsWishlisted(prev), 
+                onFinish: () => setWishlistLoading(false),
+            }
+        );
+    };
+
+    const handleBook = (room) => {
+        setModalRoom(null);
+        if (!isLoggedIn) {
+            router.visit(route("login"));
+            return;
+        }
+        router.visit(route("booking.create", { room_type_id: room.id }));
+    };
+
+    const handleChat = () => {
+        if (!isLoggedIn) {
+            router.visit(route("login"));
+            return;
+        }
+    };
 
     return (
         <div className="min-h-screen bg-mint-50 dark:bg-dark-bg pb-20 transition-colors duration-300">
-            {/* ── NAVBAR ──────────────────────────────── */}
-            <div
-                className="
+
+            <div className="
                 sticky top-0 z-50
                 bg-white/90 dark:bg-dark-card/90
                 backdrop-blur border-b
                 border-mint-200 dark:border-dark-border/20
                 px-[6%] lg:px-[10%] py-3
                 flex items-center justify-between
-            "
-            >
-
-            <FlashAlert />
+            ">
+                <FlashAlert />
 
                 <button
                     onClick={() => window.history.back()}
@@ -254,12 +214,7 @@ export default function DetailKos({ property = null, similar = [] }) {
 
                 <div className="flex items-center gap-2">
                     <button
-                        onClick={() =>
-                            navigator.share?.({
-                                title: property.name,
-                                url: window.location.href,
-                            })
-                        }
+                        onClick={() => navigator.share?.({ title: property.name, url: window.location.href })}
                         className="
                             p-2 rounded-lg transition
                             bg-mint-50 dark:bg-dark-bg
@@ -270,43 +225,47 @@ export default function DetailKos({ property = null, similar = [] }) {
                     >
                         <Share2 className="w-4 h-4" />
                     </button>
+
                     <button
-                        onClick={() => toggleWishlist()}
+                        onClick={handleWishlist}
+                        disabled={wishlistLoading}
+                        title={!isLoggedIn ? "Login untuk menyimpan wishlist" : ""}
                         className="
                             p-2 rounded-lg transition
                             bg-mint-50 dark:bg-dark-bg
                             border border-mint-200 dark:border-dark-border/20
+                            disabled:opacity-50
                         "
                     >
-                        <Heart
-                            className={`w-4 h-4 transition ${isWishlisted ? "fill-red-400 stroke-red-400" : "text-kost-muted dark:text-mint-100/40"}`}
-                        />
+                        <Heart className={`w-4 h-4 transition ${
+                            isWishlisted && isLoggedIn
+                                ? "fill-red-400 stroke-red-400"
+                                : "text-kost-muted dark:text-mint-100/40"
+                        }`} />
                     </button>
+
                     <button
                         onClick={() => setIsDark(!isDark)}
                         className="
-                                p-2 rounded-lg
-                                bg-mint-50 dark:bg-dark-card
-                                border
-                                border-mint-200 dark:border-dark-border/20
-                                text-kost-muted dark:text-mint-100/60
-                                hover:bg-mint-100 dark:hover:bg-dark-card/60
-                                transition
-                            "
+                            p-2 rounded-lg transition
+                            bg-mint-50 dark:bg-dark-card
+                            border border-mint-200 dark:border-dark-border/20
+                            text-kost-muted dark:text-mint-100/60
+                            hover:bg-mint-100 dark:hover:bg-dark-card/60
+                        "
                         aria-label="Toggle dark mode"
                     >
-                        {isDark ? (
-                            <Sun className="w-4 h-4 text-mint-200" />
-                        ) : (
-                            <Moon className="w-4 h-4" />
-                        )}
+                        {isDark
+                            ? <Sun  className="w-4 h-4 text-mint-200" />
+                            : <Moon className="w-4 h-4" />
+                        }
                     </button>
                 </div>
             </div>
 
             <div className="px-[6%] lg:px-[10%] mt-6 space-y-6">
+
                 <div className="grid lg:grid-cols-3 gap-3">
-                    {/* Main image */}
                     <div className="lg:col-span-2 relative rounded-2xl overflow-hidden h-[320px] group">
                         <img
                             src={
@@ -317,77 +276,34 @@ export default function DetailKos({ property = null, similar = [] }) {
                             alt={property.name}
                             className="w-full h-full object-cover"
                         />
-
-                        {/* Prev/Next */}
                         {images.length > 1 && (
                             <>
-                                <button
-                                    onClick={prevImage}
-                                    className="
-                                        absolute left-3 top-1/2 -translate-y-1/2
-                                        p-1.5 rounded-full transition
-                                        bg-white/80 dark:bg-dark-card/80
-                                        text-kost-dark dark:text-mint-50
-                                        opacity-0 group-hover:opacity-100
-                                        hover:bg-white dark:hover:bg-dark-card
-                                    "
-                                >
+                                <button onClick={prevImage} className="absolute left-3 top-1/2 -translate-y-1/2 p-1.5 rounded-full transition bg-white/80 dark:bg-dark-card/80 text-kost-dark dark:text-mint-50 opacity-0 group-hover:opacity-100">
                                     <ChevronLeft className="w-4 h-4" />
                                 </button>
-                                <button
-                                    onClick={nextImage}
-                                    className="
-                                        absolute right-3 top-1/2 -translate-y-1/2
-                                        p-1.5 rounded-full transition
-                                        bg-white/80 dark:bg-dark-card/80
-                                        text-kost-dark dark:text-mint-50
-                                        opacity-0 group-hover:opacity-100
-                                        hover:bg-white dark:hover:bg-dark-card
-                                    "
-                                >
+                                <button onClick={nextImage} className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-full transition bg-white/80 dark:bg-dark-card/80 text-kost-dark dark:text-mint-50 opacity-0 group-hover:opacity-100">
                                     <ChevronRight className="w-4 h-4" />
                                 </button>
-
-                                {/* Counter */}
-                                <div
-                                    className="
-                                    absolute bottom-3 right-3
-                                    px-2 py-1 rounded-full text-xs
-                                    bg-black/40 text-white backdrop-blur-sm
-                                "
-                                >
+                                <div className="absolute bottom-3 right-3 px-2 py-1 rounded-full text-xs bg-black/40 text-white backdrop-blur-sm">
                                     {activeImage + 1}/{images.length}
                                 </div>
                             </>
                         )}
                     </div>
 
-                    {/* Thumbnails */}
                     <div className="grid grid-cols-3 lg:grid-cols-1 gap-2">
                         {images.slice(0, 3).map((img, i) => (
                             <div
                                 key={i}
                                 onClick={() => setActiveImage(i)}
-                                className={`
-                                    relative h-24 rounded-xl overflow-hidden cursor-pointer
-                                    border-2 transition
-                                    ${
-                                        activeImage === i
-                                            ? "border-mint-300"
-                                            : "border-transparent hover:border-mint-200"
-                                    }
-                                `}
+                                className={`relative h-24 rounded-xl overflow-hidden cursor-pointer border-2 transition ${
+                                    activeImage === i ? "border-mint-300" : "border-transparent hover:border-mint-200"
+                                }`}
                             >
-                                <img
-                                    src={`/storage/${img.image_path}`}
-                                    className="w-full h-full object-cover"
-                                />
-                                {/* More overlay */}
+                                <img src={`/storage/${img.image_path}`} className="w-full h-full object-cover" />
                                 {i === 2 && images.length > 3 && (
                                     <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                                        <span className="text-white text-sm font-medium">
-                                            +{images.length - 3}
-                                        </span>
+                                        <span className="text-white text-sm font-medium">+{images.length - 3}</span>
                                     </div>
                                 )}
                             </div>
@@ -396,26 +312,17 @@ export default function DetailKos({ property = null, similar = [] }) {
                 </div>
 
                 <div className="grid lg:grid-cols-3 gap-6">
-                    {/* LEFT */}
+
                     <div className="lg:col-span-2 space-y-5">
-                        {/* JUDUL */}
+
                         <SectionCard>
                             <div className="flex items-start justify-between gap-3">
                                 <div className="space-y-2">
-                                    <div className="flex flex-wrap gap-2">
-                                        {property.type && (
-                                            <span
-                                                className="
-                                                px-2.5 py-1 rounded-full text-xs font-medium capitalize
-                                                bg-mint-50 dark:bg-dark-bg
-                                                text-kost-muted dark:text-mint-100/60
-                                                border border-mint-200 dark:border-dark-border/20
-                                            "
-                                            >
-                                                Kos {property.type}
-                                            </span>
-                                        )}
-                                    </div>
+                                    {property.type && (
+                                        <span className="px-2.5 py-1 rounded-full text-xs font-medium capitalize bg-mint-50 dark:bg-dark-bg text-kost-muted dark:text-mint-100/60 border border-mint-200 dark:border-dark-border/20">
+                                            Kos {property.type}
+                                        </span>
+                                    )}
                                     <h1 className="text-xl font-medium text-kost-dark dark:text-mint-50">
                                         {property.name}
                                     </h1>
@@ -424,7 +331,6 @@ export default function DetailKos({ property = null, similar = [] }) {
                                         {property.address}, {property.city}
                                     </p>
                                 </div>
-
                                 {property.rating && (
                                     <div className="flex items-center gap-1 text-yellow-500 flex-shrink-0">
                                         <Star className="w-4 h-4 fill-yellow-400 stroke-yellow-500" />
@@ -436,30 +342,25 @@ export default function DetailKos({ property = null, similar = [] }) {
                             </div>
                         </SectionCard>
 
-                        {/* TIPE KAMAR */}
                         {roomTypes.length > 0 && (
                             <SectionCard title="Tipe Kamar">
                                 <div className="space-y-3">
                                     {roomTypes.map((room) => (
                                         <div
                                             key={room.id}
-                                            onClick={() =>
-                                                setSelectedRoom(room)
-                                            }
+                                            onClick={() => setSelectedRoom(room)}
                                             className={`
-                        cursor-pointer rounded-xl p-4 border transition
-                        ${
-                            selectedRoom?.id === room.id
-                                ? "bg-mint-100 dark:bg-mint-200/10 border-mint-300 dark:border-mint-300/30"
-                                : "bg-mint-50 dark:bg-dark-bg border-mint-200 dark:border-dark-border/20 hover:bg-mint-100 dark:hover:bg-mint-200/10"
-                        }
-                    `}
+                                                cursor-pointer rounded-xl p-4 border transition
+                                                ${selectedRoom?.id === room.id
+                                                    ? "bg-mint-100 dark:bg-mint-200/10 border-mint-300 dark:border-mint-300/30"
+                                                    : "bg-mint-50 dark:bg-dark-bg border-mint-200 dark:border-dark-border/20 hover:bg-mint-100 dark:hover:bg-mint-200/10"
+                                                }
+                                            `}
                                         >
                                             <div className="flex items-center justify-between gap-3">
                                                 <div className="space-y-1">
                                                     <div className="flex items-center gap-2">
-                                                        {selectedRoom?.id ===
-                                                            room.id && (
+                                                        {selectedRoom?.id === room.id && (
                                                             <CheckCircle className="w-4 h-4 text-mint-300" />
                                                         )}
                                                         <p className="text-sm font-medium text-kost-dark dark:text-mint-50">
@@ -467,29 +368,17 @@ export default function DetailKos({ property = null, similar = [] }) {
                                                         </p>
                                                     </div>
                                                     <div className="flex items-center gap-3 text-xs text-kost-muted dark:text-mint-100/50">
-                                                        {room.room_width &&
-                                                            room.room_length && (
-                                                                <span>
-                                                                    {
-                                                                        room.room_width
-                                                                    }
-                                                                    ×
-                                                                    {
-                                                                        room.room_length
-                                                                    }{" "}
-                                                                    m
-                                                                </span>
-                                                            )}
+                                                        {room.room_width && room.room_length && (
+                                                            <span>{room.room_width}×{room.room_length} m</span>
+                                                        )}
                                                         {room.capacity && (
                                                             <span className="flex items-center gap-1">
                                                                 <Users className="w-3 h-3" />
-                                                                {room.capacity}{" "}
-                                                                orang
+                                                                {room.capacity} orang
                                                             </span>
                                                         )}
                                                         <span className="px-2 py-0.5 rounded-full bg-mint-200/60 dark:bg-mint-200/20 text-kost-dark dark:text-mint-100">
-                                                            {room.total_rooms}{" "}
-                                                            unit
+                                                            {room.total_rooms} unit
                                                         </span>
                                                     </div>
                                                 </div>
@@ -497,36 +386,22 @@ export default function DetailKos({ property = null, similar = [] }) {
                                                 <div className="flex items-center gap-3 flex-shrink-0">
                                                     <div className="text-right">
                                                         <p className="text-sm font-medium text-kost-dark dark:text-mint-50">
-                                                            Rp{" "}
-                                                            {Number(
-                                                                room.price,
-                                                            ).toLocaleString(
-                                                                "id-ID",
-                                                            )}
+                                                            Rp {Number(room.price).toLocaleString("id-ID")}
                                                         </p>
                                                         <p className="text-xs text-kost-muted dark:text-mint-100/40">
-                                                            /
-                                                            {room.rental_type ===
-                                                            "monthly"
-                                                                ? "bulan"
-                                                                : "hari"}
+                                                            /{room.rental_type === "monthly" ? "bulan" : "hari"}
                                                         </p>
                                                     </div>
-
-                                                    {/* Tombol detail — buka modal */}
                                                     <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation(); // ← jangan trigger setSelectedRoom
-                                                            setModalRoom(room);
-                                                        }}
+                                                        onClick={(e) => { e.stopPropagation(); setModalRoom(room); }}
                                                         className="
-                                    px-3 py-1.5 rounded-lg text-xs transition flex-shrink-0
-                                    bg-white dark:bg-dark-card
-                                    border border-mint-200 dark:border-dark-border/20
-                                    text-kost-muted dark:text-mint-100/50
-                                    hover:bg-mint-100 dark:hover:bg-dark-bg
-                                    hover:text-kost-dark dark:hover:text-mint-50
-                                "
+                                                            px-3 py-1.5 rounded-lg text-xs transition flex-shrink-0
+                                                            bg-white dark:bg-dark-card
+                                                            border border-mint-200 dark:border-dark-border/20
+                                                            text-kost-muted dark:text-mint-100/50
+                                                            hover:bg-mint-100 dark:hover:bg-dark-bg
+                                                            hover:text-kost-dark dark:hover:text-mint-50
+                                                        "
                                                     >
                                                         Detail
                                                     </button>
@@ -538,28 +413,22 @@ export default function DetailKos({ property = null, similar = [] }) {
                             </SectionCard>
                         )}
 
-                        {/* Modal tipe kamar */}
                         <RoomTypeModal
                             room={modalRoom}
                             onClose={() => setModalRoom(null)}
                             onBook={handleBook}
                         />
 
-                        {/* FASILITAS */}
                         {facilities.length > 0 && (
                             <SectionCard title="Fasilitas">
                                 <div className="flex flex-wrap gap-2">
                                     {facilities.map((f) => (
-                                        <div
-                                            key={f.id}
-                                            className="
-                                                flex items-center gap-2
-                                                px-3 py-2 rounded-xl text-sm
-                                                bg-mint-50 dark:bg-dark-bg
-                                                border border-mint-200 dark:border-dark-border/20
-                                                text-kost-muted dark:text-mint-100/60
-                                            "
-                                        >
+                                        <div key={f.id} className="
+                                            flex items-center gap-2 px-3 py-2 rounded-xl text-sm
+                                            bg-mint-50 dark:bg-dark-bg
+                                            border border-mint-200 dark:border-dark-border/20
+                                            text-kost-muted dark:text-mint-100/60
+                                        ">
                                             {FACILITY_ICONS[f.name] ?? null}
                                             {f.name}
                                         </div>
@@ -568,7 +437,6 @@ export default function DetailKos({ property = null, similar = [] }) {
                             </SectionCard>
                         )}
 
-                        {/* DESKRIPSI */}
                         {property.description && (
                             <SectionCard title="Deskripsi">
                                 <p className="text-sm text-kost-muted dark:text-mint-100/60 leading-relaxed whitespace-pre-line">
@@ -577,7 +445,6 @@ export default function DetailKos({ property = null, similar = [] }) {
                             </SectionCard>
                         )}
 
-                        {/* PERATURAN */}
                         {property.rules && (
                             <SectionCard title="Peraturan Kos">
                                 <p className="text-sm text-kost-muted dark:text-mint-100/60 leading-relaxed whitespace-pre-line">
@@ -586,26 +453,16 @@ export default function DetailKos({ property = null, similar = [] }) {
                             </SectionCard>
                         )}
 
-                        {/* MAP */}
                         {property.latitude && property.longitude && (
                             <SectionCard title="Lokasi">
                                 <div className="rounded-xl overflow-hidden h-56 border border-mint-200 dark:border-dark-border/20">
                                     <MapContainer
-                                        center={[
-                                            property.latitude,
-                                            property.longitude,
-                                        ]}
+                                        center={[property.latitude, property.longitude]}
                                         zoom={16}
                                         style={{ height: "250px" }}
                                     >
                                         <GoogleTileLayer />
-                                        <Marker
-                                            position={[
-                                                property.latitude,
-                                                property.longitude,
-                                            ]}
-                                            icon={icon}
-                                        >
+                                        <Marker position={[property.latitude, property.longitude]} icon={icon}>
                                             <Popup>{property.name}</Popup>
                                         </Marker>
                                     </MapContainer>
@@ -618,7 +475,6 @@ export default function DetailKos({ property = null, similar = [] }) {
                         )}
                     </div>
 
-                    {/* RIGHT — BOOKING CARD ─────────────────── */}
                     <div className="sticky top-20 h-fit space-y-3">
                         <SectionCard>
                             <div>
@@ -626,15 +482,9 @@ export default function DetailKos({ property = null, similar = [] }) {
                                     Mulai dari
                                 </p>
                                 <p className="text-xl font-medium text-kost-dark dark:text-mint-50">
-                                    Rp{" "}
-                                    {Number(
-                                        selectedRoom?.price ?? lowestPrice ?? 0,
-                                    ).toLocaleString("id-ID")}
+                                    Rp {Number(selectedRoom?.price ?? lowestPrice ?? 0).toLocaleString("id-ID")}
                                     <span className="text-xs text-kost-muted dark:text-mint-100/40 font-normal ml-1">
-                                        /
-                                        {selectedRoom?.rental_type === "monthly"
-                                            ? "bulan"
-                                            : "hari"}
+                                        /{selectedRoom?.rental_type === "monthly" ? "bulan" : "hari"}
                                     </span>
                                 </p>
                                 {selectedRoom && (
@@ -645,32 +495,53 @@ export default function DetailKos({ property = null, similar = [] }) {
                             </div>
 
                             <div className="space-y-2 pt-2 border-t border-mint-200 dark:border-dark-border/20">
-                                <button
-                                    className="
-                                    w-full py-2.5 rounded-xl text-sm font-medium transition
-                                    bg-mint-200      dark:bg-mint-200/20
-                                    border border-mint-200 dark:border-mint-300/20
-                                    text-kost-dark   dark:text-mint-50
-                                    hover:bg-mint-300 dark:hover:bg-mint-300/30
-                                "
-                                >
-                                    Booking Sekarang
-                                </button>
+                                {isLoggedIn ? (
+                                    <>
+                                        <button
+                                            onClick={() => handleBook(selectedRoom)}
+                                            disabled={!selectedRoom}
+                                            className="
+                                                w-full py-2.5 rounded-xl text-sm font-medium transition
+                                                bg-mint-200      dark:bg-mint-200/20
+                                                border border-mint-200 dark:border-mint-300/20
+                                                text-kost-dark   dark:text-mint-50
+                                                hover:bg-mint-300 dark:hover:bg-mint-300/30
+                                                disabled:opacity-50 disabled:cursor-not-allowed
+                                            "
+                                        >
+                                            Booking Sekarang
+                                        </button>
 
-                                <button
-                                    className="
-                                    w-full py-2.5 rounded-xl text-sm transition
-                                    flex items-center justify-center gap-2
-                                    bg-mint-50 dark:bg-dark-bg
-                                    border border-mint-200 dark:border-dark-border/20
-                                    text-kost-muted dark:text-mint-100/50
-                                    hover:bg-mint-100 dark:hover:bg-dark-card
-                                    hover:text-kost-dark dark:hover:text-mint-50
-                                "
-                                >
-                                    <MessageCircle className="w-4 h-4" />
-                                    Chat Pemilik
-                                </button>
+                                        {/* Chat */}
+                                        <button
+                                            onClick={handleChat}
+                                            className="
+                                                w-full py-2.5 rounded-xl text-sm transition
+                                                flex items-center justify-center gap-2
+                                                bg-mint-50 dark:bg-dark-bg
+                                                border border-mint-200 dark:border-dark-border/20
+                                                text-kost-muted dark:text-mint-100/50
+                                                hover:bg-mint-100 dark:hover:bg-dark-card
+                                                hover:text-kost-dark dark:hover:text-mint-50
+                                            "
+                                        >
+                                            <MessageCircle className="w-4 h-4" />
+                                            Chat Pemilik
+                                        </button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <LoginPrompt text="Login untuk Booking" />
+                                        <LoginPrompt text="Login untuk Chat" />
+
+                                        <p className="text-xs text-kost-muted dark:text-mint-100/30 text-center pt-1">
+                                            Sudah punya akun?{" "}
+                                            <Link href={route("login")} className="text-mint-300 hover:underline">
+                                                Masuk di sini
+                                            </Link>
+                                        </p>
+                                    </>
+                                )}
                             </div>
 
                             <p className="text-xs text-kost-muted dark:text-mint-100/30 text-center">
@@ -686,10 +557,7 @@ export default function DetailKos({ property = null, similar = [] }) {
                             <h2 className="text-sm font-medium text-kost-dark dark:text-mint-50">
                                 Kos Serupa di Sekitar
                             </h2>
-                            <Link
-                                href="/search"
-                                className="text-xs text-mint-300 hover:underline"
-                            >
+                            <Link href="/search" className="text-xs text-mint-300 hover:underline">
                                 Lihat semua
                             </Link>
                         </div>

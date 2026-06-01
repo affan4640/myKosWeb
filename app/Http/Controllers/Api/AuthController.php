@@ -164,7 +164,7 @@ class AuthController extends Controller
         $url = Socialite::driver('google')
             ->stateless()
             ->with(['state' => $state])
-            ->redirectUrl(url('/api/auth/google/mobile/callback'))
+            ->redirectUrl(config('services.google.redirect'))
             ->redirect()
             ->getTargetUrl();
 
@@ -182,7 +182,7 @@ class AuthController extends Controller
         try {
             $googleUser = Socialite::driver('google')
                 ->stateless()
-                ->redirectUrl(url('/api/auth/google/mobile/callback'))
+                ->redirectUrl(config('services.google.redirect'))
                 ->user();
         } catch (\Exception $e) {
             return $platform === 'mobile'

@@ -1,4 +1,5 @@
 <?php
+
 use App\Http\Controllers\Api\PaymentController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
@@ -9,6 +10,7 @@ use App\Http\Controllers\Api\RentalRequestController;
 use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\ComplaintController;
+use App\Http\Controllers\Api\InvoiceController;
 
 Route::get('/auth/google/mobile', [AuthController::class, 'redirectToGoogle']);
 Route::get('/auth/google/mobile/callback', [AuthController::class, 'handleGoogleCallback']);
@@ -18,6 +20,9 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/forgot-password', [AuthController::class, 'sendOtp']);
 Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+
+Route::post('/xendit/callback', [PaymentController::class, 'callback']);
+Route::post('/xendit/webhook',  [PaymentController::class, 'callback']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'me']);
@@ -39,6 +44,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/rental-requests', [RentalRequestController::class, 'store']);
     Route::get('/rental-requests', [RentalRequestController::class, 'index']);
     Route::get('/rental-requests/{id}', [RentalRequestController::class, 'show']);
+    Route::post('rental-requests/{id}/invoice', [PaymentController::class, 'createInvoiceForRentalRequest']);
 
     Route::get('/conversations', [ChatController::class, 'getConversations']);
     Route::get('/conversations/{id}/messages', [ChatController::class, 'getMessages']);
@@ -52,13 +58,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/complaints', [ComplaintController::class, 'store']);
     Route::put('/complaints/{id}', [ComplaintController::class, 'update']);
 
-    Route::post(
-        '/invoice/{invoice}/pay',
-        [PaymentController::class, 'createInvoice']
-    );
+    Route::post('/invoices/create',[PaymentController::class, 'createInvoice']);
+    Route::post('/invoices/{id}/mark-paid', [PaymentController::class, 'markPaid']);
 });
-
-Route::post(
-    '/xendit/callback',
-    [PaymentController::class, 'callback']
-);

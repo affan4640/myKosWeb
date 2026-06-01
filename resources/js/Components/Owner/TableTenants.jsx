@@ -135,6 +135,9 @@ export default function TableTenants({ tenants = [] }) {
                                     Tanggal Sewa
                                 </th>
                                 <th className="p-4 text-left text-xs font-medium text-kost-muted dark:text-mint-100/40">
+                                    Tanggal Keluar
+                                </th>
+                                <th className="p-4 text-left text-xs font-medium text-kost-muted dark:text-mint-100/40">
                                     Status
                                 </th>
                                 <th className="p-4 text-right text-xs font-medium text-kost-muted dark:text-mint-100/40">
@@ -199,6 +202,13 @@ export default function TableTenants({ tenants = [] }) {
                                         </td>
 
                                         <td className="p-4">
+                                            <div className="flex items-center gap-2 text-sm text-kost-muted dark:text-mint-100/50">
+                                                <CalendarDays className="w-4 h-4 text-kost-muted dark:text-mint-100/40" />
+                                                {tenant.check_out || "-"}
+                                            </div>
+                                        </td>
+
+                                        <td className="p-4">
                                             <StatusBadge
                                                 status={tenant.status}
                                             />
@@ -211,7 +221,10 @@ export default function TableTenants({ tenants = [] }) {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="6" className="text-center py-12">
+                                    <td
+                                        colSpan="7"
+                                        className="text-center py-12"
+                                    >
                                         <div className="flex flex-col items-center">
                                             <div
                                                 className="
@@ -229,7 +242,8 @@ export default function TableTenants({ tenants = [] }) {
                                             </p>
 
                                             <p className="text-sm text-kost-muted dark:text-mint-100/30 mt-1">
-                                                Data penghuni kos akan muncul di sini.
+                                                Data penghuni kos akan muncul di
+                                                sini.
                                             </p>
                                         </div>
                                     </td>
