@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Contract extends Model
 {
     protected $fillable = [
+        'rental_request_id',
         'room_type_id',
         'tenant_id',
         'start_date',

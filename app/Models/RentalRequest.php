@@ -14,13 +14,25 @@ class RentalRequest extends Model
         'duration_type',
         'note',
         'status',
+        'is_renewal',
+        'contract_id',
+    ];
+    protected $casts = [
+        'is_renewal' => 'boolean',
     ];
 
-    public function roomType() {
+    public function roomType()
+    {
         return $this->belongsTo(RoomType::class);
     }
 
-    public function tenant() {
+    public function tenant()
+    {
         return $this->belongsTo(User::class, 'tenant_id');
+    }
+
+    public function contract()
+    {
+        return $this->hasOne(\App\Models\Contract::class, 'rental_request_id');
     }
 }
