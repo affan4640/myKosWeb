@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Facility;
-use Illuminate\Http\Request;
 use App\Models\Property;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class SearchController extends Controller
@@ -12,52 +12,41 @@ class SearchController extends Controller
     public function index(Request $request)
     {
         $query = Property::with([
-
             'facilities',
             'roomTypes',
             'images',
-
-            'wishlists' => function ($q) {
-                $q->where('user_id', auth()->id());
-            }
-
         ]);
 
-        // SEARCH
-        if ($request->filled('search')) {
+        if (auth()->check()) {
+            $query->with(['wishlists' => function ($q) {
+                $q->where('user_id', auth()->id());
+            }]);
+        }
 
-            $search = $request->search;
+        // SEARCH by keyword
+        if ($request->filled('q') || $request->filled('search')) {
+            $search = $request->q ?? $request->search;
 
             $query->where(function ($q) use ($search) {
-
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('address', 'like', "%{$search}%")
-                    ->orWhere('city', 'like', "%{$search}%");
-
+                $q->where('name',    'like', "%{$search}%")
+                  ->orWhere('address', 'like', "%{$search}%")
+                  ->orWhere('city',    'like', "%{$search}%");
             });
         }
 
         // MAX PRICE
         if ($request->filled('max_price')) {
-
             $query->whereHas('roomTypes', function ($q) use ($request) {
-
                 $q->where('price', '<=', $request->max_price);
-
             });
         }
 
         // FACILITIES
         if ($request->filled('facilities')) {
-
             foreach ($request->facilities as $facilityId) {
-
                 $query->whereHas('facilities', function ($q) use ($facilityId) {
-
                     $q->where('facilities.id', $facilityId);
-
                 });
-
             }
         }
 
@@ -65,11 +54,12 @@ class SearchController extends Controller
             ->where('type', 'property')
             ->get();
 
-        $properties = $query->paginate(10);
+        $properties = $query->paginate(10)->withQueryString();
 
         return Inertia::render('SearchPage', [
             'properties' => $properties,
-            'facilities' => $facilities
+            'facilities' => $facilities,
+            'query'      => $request->q ?? $request->search ?? '',
         ]);
     }
 }
