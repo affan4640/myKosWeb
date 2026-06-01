@@ -33,7 +33,7 @@ class PropertyController extends Controller
             });
 
         })
-
+        ->latest()
         ->paginate(10)
         ->withQueryString();
 

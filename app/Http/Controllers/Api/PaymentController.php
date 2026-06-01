@@ -246,6 +246,7 @@ class PaymentController extends Controller
     {
         try {
             $token = $request->header('x-callback-token');
+
             if ($token !== config('services.xendit.webhook_token')) {
                 return response()->json(['message' => 'Unauthorized'], 403);
             }
@@ -254,11 +255,18 @@ class PaymentController extends Controller
                 ->orWhere('midtrans_order_id', $request->external_id)
                 ->first();
 
-            if (! $invoice) {
+                if (! $invoice) {
                 Log::warning('Xendit callback: invoice not found', [
                     'external_id' => $request->external_id,
                 ]);
-                return response()->json(['message' => 'Invoice not found'], 404);
+                    return response()->json(['message' => 'Invoice not found'], 404);
+                }
+
+            if (in_array($invoice->status, ['paid', 'expired'])) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Webhook duplikat diabaikan, transaksi sudah pernah diproses.'
+                ], 200); 
             }
 
             DB::transaction(function () use ($request, $invoice) {
