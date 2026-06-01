@@ -335,13 +335,17 @@ Route::post('/notifications/{id}/mark-read', function ($id) {
     return back();
 })->name('admin.notifications.markOneRead');
 
+Route::get('/search', [SearchController::class, 'index'])->name('search');
+
+Route::get('/kos/{id}', [KosController::class, 'detail'])->name('kos.detail');
+
 Route::middleware('auth')->group(function () {
 
     Route::get('/profile', function () {
         return Inertia::render('Profile');
     })->name('profile');
 
-    Route::get('/search', [SearchController::class, 'index'])->name('search');
+    
 
     Route::put('/profile/update', [ProfileController::class, 'update'])
         ->name('profile.update');
@@ -360,7 +364,7 @@ Route::middleware('auth')->group(function () {
         return Inertia::render('DetailKos');
     })->name('detail.kos');
 
-    Route::get('/kos/{id}', [KosController::class, 'detail'])->name('kos.detail');
+    
 
     Route::post('/wishlist', [WishlistController::class, 'toggle'])->name('wishlist.update');
 });

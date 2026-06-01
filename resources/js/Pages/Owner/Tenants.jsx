@@ -12,7 +12,7 @@ export default function Tenants({ tenants }) {
     return(
         <OwnerLayout>
 
-        <TableTenants tenants={tenants.data} />
+        <TableTenants tenants={tenants.data ?? []} />
 
         <Pagination links={tenants.links} />
 

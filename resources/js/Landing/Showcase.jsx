@@ -18,6 +18,11 @@ import {
 import AOS from "aos";
 import "aos/dist/aos.css";
 
+import review1 from "../../assets/review1.jpeg";
+import review2 from "../../assets/review2.jpeg";
+import review3 from "../../assets/review3.jpeg";
+
+
 const features = [
     {
         title: "Pencarian Kos Cerdas",
@@ -41,19 +46,19 @@ const projects = [
         id: 1,
         title: "Cari Kos",
         desc: "Temukan kos sesuai lokasi dan kebutuhan.",
-        img: "/img/app1.png",
+        img: review2,
     },
     {
         id: 2,
         title: "Detail Kos",
         desc: "Lihat foto, fasilitas, harga, dan lokasi kos.",
-        img: "/img/app2.png",
+        img: review1,
     },
     {
         id: 3,
         title: "Booking Kos",
         desc: "Ajukan booking kos dengan lebih cepat.",
-        img: "/img/app3.png",
+        img: review3,
     },
 ];
 

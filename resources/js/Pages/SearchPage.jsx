@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { router } from "@inertiajs/react";
+import { router, usePage } from "@inertiajs/react";
 
 import SearchBar from "@/Components/Search/SearchBar";
 import FilterSidebar from "@/Components/Search/FilterSidebar";
@@ -27,16 +27,21 @@ import {
     Heart
 } from "lucide-react";
 
-function ChangeMapView({ center }) {
+function ChangeMapView({ position }) {
     const map = useMap();
 
     useEffect(() => {
-        if(center) {
-            map.flyTo(center, 14, {
-                duration: 1.5
-            });
-        }
-    }, [center, map]);
+        // Guard: pastikan lat/lng valid sebelum flyTo
+        if (
+            !position ||
+            position.lat == null ||
+            position.lng == null ||
+            isNaN(position.lat) ||
+            isNaN(position.lng)
+        ) return;
+
+        map.flyTo([position.lat, position.lng], 15);
+    }, [position]);
 
     return null;
 }
@@ -51,36 +56,33 @@ const MapView = ({ properties, position, radius }) => {
         <div className="w-full h-full rounded-2xl overflow-hidden border border-mint-200 dark:border-dark-border/20">
             <MapContainer
                 center={
-                    position
+                    // ✅ Pastikan center valid
+                    position?.lat && position?.lng && !isNaN(position.lat) && !isNaN(position.lng)
                         ? [position.lat, position.lng]
                         : [-8.159822347307612, 113.72309285357674]
                 }
-                zoom={10}
+                zoom={15}
                 style={{ height: "100%", width: "100%" }}
             >
+                <GoogleTileLayer />
 
-            <ChangeMapView 
-                center={
-                    position
-                        ? [position.lat, position.lng]
-                        : [-8.159822347307612, 113.72309285357674]
-                }
-                zoom={10}
-            />
+                {/* ✅ Hanya render ChangeMapView jika position valid */}
+                {position?.lat && position?.lng &&
+                 !isNaN(position.lat) && !isNaN(position.lng) && (
+                    <ChangeMapView position={position} />
+                )}
 
-            <GoogleTileLayer />
-
-                {position && (
+                {position?.lat && position?.lng && (
                     <>
                         <Circle
                             center={[position.lat, position.lng]}
                             radius={radius * 1000}
                             pathOptions={{
-                                color: "#93BFC7",
-                                fillColor: "#ABE7B2",
+                                color:       "#93BFC7",
+                                fillColor:   "#ABE7B2",
                                 fillOpacity: 0.15,
-                                weight: 1.5,
-                                dashArray: "6 4",
+                                weight:      1.5,
+                                dashArray:   "6 4",
                             }}
                         />
                         <Marker position={[position.lat, position.lng]}>
@@ -90,30 +92,26 @@ const MapView = ({ properties, position, radius }) => {
                 )}
 
                 {properties.map((p) =>
-                    p.latitude && p.longitude ? (
+                    // ✅ Guard koordinat property juga
+                    p.latitude && p.longitude &&
+                    !isNaN(parseFloat(p.latitude)) &&
+                    !isNaN(parseFloat(p.longitude)) ? (
                         <Marker
                             key={p.id}
                             icon={icon}
-                            position={[p.latitude, p.longitude]}
+                            position={[parseFloat(p.latitude), parseFloat(p.longitude)]}
                         >
                             <Popup>
                                 <div className="space-y-1 min-w-[150px]">
-                                    <p className="font-medium text-sm">
-                                        {p.name}
-                                    </p>
-                                    <p className="text-xs text-gray-500 truncate">
-                                        {p.address}
-                                    </p>
+                                    <p className="font-medium text-sm">{p.name}</p>
+                                    <p className="text-xs text-gray-500 truncate">{p.address}</p>
                                     <p className="text-xs font-medium text-green-600">
-                                        Rp{" "}
-                                        {Number(
-                                            p.room_types?.[0]?.price ?? 0,
-                                        ).toLocaleString("id-ID")}
+                                        Rp {Number(p.room_types?.[0]?.price ?? 0).toLocaleString("id-ID")}
                                     </p>
                                 </div>
                             </Popup>
                         </Marker>
-                    ) : null,
+                    ) : null
                 )}
             </MapContainer>
         </div>
@@ -275,10 +273,16 @@ const countActiveFilters = (applied) =>
    MAIN
 ================================================================ */
 export default function SearchPage({
+
+    
+
     properties = [],
     query = "",
     facilities = [],
 }) {
+
+    const { auth } = usePage().props;
+const user = auth?.user;
     const defaultFilters = { type: "all", maxPrice: 2000000, facilities: [], wishlistOnly: false };
 
     const [keyword, setKeyword] = useState(query);
@@ -348,6 +352,18 @@ export default function SearchPage({
         setFilters(next);
     };
 
+    const handleWishlistFilter = () => {
+    if (!user) {
+        alert("Silakan login terlebih dahulu untuk menggunakan fitur wishlist.");
+        router.get("/login");
+        return;
+    }
+
+    patchApplied({
+        wishlistOnly: !applied.wishlistOnly,
+    });
+};
+
     /* ── Derived ───────────────────────────── */
     const filtered = useSearchFilter({
         properties,
@@ -372,6 +388,8 @@ export default function SearchPage({
             facilities={facilities}
         />
     );
+
+    
 
     return (
         <div
@@ -432,17 +450,20 @@ export default function SearchPage({
                     onSearch={handleSearch}
                     onClear={handleClear}
                     onSelectLocation={(loc) => {
-                        setKeyword(loc.name);
+    const lat = Number(loc.lat);
+    const lng = Number(loc.lng);
 
-                        setAppliedKeyword(loc.name);
+    setKeyword(loc.name);
+    setAppliedKeyword(loc.name);
 
-                        setPosition({
-                            lat: loc.lat,
-                            lng: loc.lng,
-                        });
-
-                        setSelectedLocation(loc);
-                    }}
+    if (Number.isFinite(lat) && Number.isFinite(lng)) {
+        setPosition({ lat, lng });
+        setSelectedLocation(loc);
+    } else {
+        setPosition(null);
+        setSelectedLocation(null);
+    }
+}}
                 />
 
                 {/* Radius control */}
@@ -515,7 +536,6 @@ export default function SearchPage({
 
                 {/* Results */}
                 <main className="flex-1 min-w-0 space-y-3">
-                    {/* Sort + header */}
                     <div className="flex items-center justify-between gap-3">
                         <ResultHeader
                             count={filtered.length}
@@ -544,11 +564,7 @@ export default function SearchPage({
 
                     <div className="flex items-center gap-2 flex-wrap">
     <button
-        onClick={() =>
-            patchApplied({
-                wishlistOnly: !applied.wishlistOnly,
-            })
-        }
+    onClick={handleWishlistFilter}
         className={`
             flex items-center gap-2 px-4 py-2 rounded-xl text-sm transition border
             ${

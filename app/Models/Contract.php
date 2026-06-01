@@ -33,4 +33,8 @@ class Contract extends Model
     public function Complaints() {
         return $this->hasMany(Complaint::class);
     }
+
+    public function property() { 
+        return $this->belongsTo(Property::class); 
+    }
 }
