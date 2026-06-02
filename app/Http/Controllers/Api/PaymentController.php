@@ -10,6 +10,7 @@ use App\Models\Payment;
 use App\Models\RentalRequest;
 use App\Models\Wallet;
 use App\Models\WalletTransaction;
+use App\Services\FCMService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -343,14 +344,45 @@ class PaymentController extends Controller
                             'message' => 'Pembayaran sewa kost sebesar Rp ' .
                                          number_format($invoice->amount, 0, ',', '.') .
                                          ' telah berhasil diterima.',
+                            'type'    => 'payment',
+                            'data'    => ['rental_request_id' => $rentalRequest?->id],
                         ]);
+
+                        // FCM push ke owner
+                        if ($owner->fcm_token) {
+                            FCMService::send(
+                                $owner->fcm_token,
+                                'Pembayaran Diterima',
+                                'Pembayaran sewa sebesar Rp ' . number_format($invoice->amount, 0, ',', '.') . ' diterima.',
+                                [
+                                    'type' => 'payment',
+                                    'rental_request_id' => (string) ($rentalRequest?->id ?? ''),
+                                ]
+                            );
+                        }
                     }
 
                     Notification::create([
                         'user_id' => $contract->tenant_id,
                         'title'   => 'Pembayaran Berhasil',
                         'message' => 'Pembayaran sewa kost kamu berhasil. Kontrak kamu sekarang aktif.',
+                        'type'    => 'payment',
+                        'data'    => ['rental_request_id' => $rentalRequest?->id],
                     ]);
+
+                    // FCM push ke tenant
+                    $tenant = \App\Models\User::find($contract->tenant_id);
+                    if ($tenant && $tenant->fcm_token) {
+                        FCMService::send(
+                            $tenant->fcm_token,
+                            'Pembayaran Berhasil',
+                            'Pembayaran sewa kost kamu berhasil. Kontrak kamu sekarang aktif.',
+                            [
+                                'type' => 'payment',
+                                'rental_request_id' => (string) ($rentalRequest?->id ?? ''),
+                            ]
+                        );
+                    }
                 }
 
                 if ($request->status === 'EXPIRED') {
@@ -362,7 +394,23 @@ class PaymentController extends Controller
                             'user_id' => $contract->tenant_id,
                             'title'   => 'Invoice Kedaluwarsa',
                             'message' => 'Invoice pembayaran kamu telah kedaluwarsa. Silakan ajukan permintaan sewa ulang.',
+                            'type'    => 'payment',
+                            'data'    => ['rental_request_id' => $invoice->rental_request_id],
                         ]);
+
+                        // FCM push ke tenant
+                        $tenant = \App\Models\User::find($contract->tenant_id);
+                        if ($tenant && $tenant->fcm_token) {
+                            FCMService::send(
+                                $tenant->fcm_token,
+                                'Invoice Kedaluwarsa',
+                                'Invoice pembayaran kamu telah kedaluwarsa.',
+                                [
+                                    'type' => 'payment',
+                                    'rental_request_id' => (string) ($invoice->rental_request_id ?? ''),
+                                ]
+                            );
+                        }
                     }
                 }
             });

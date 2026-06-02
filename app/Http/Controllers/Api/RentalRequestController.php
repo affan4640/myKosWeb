@@ -41,6 +41,35 @@ class RentalRequestController extends Controller
         // Load relasi yang dibutuhkan
         $rentalRequest->load('roomType.property');
 
+        // Notifikasi ke owner: Permintaan Sewa Baru / Perpanjang Sewa
+        $propertyName = $rentalRequest->roomType->property->name ?? 'Kost';
+        $ownerId = $rentalRequest->roomType->property->owner_id;
+        $title = $request->boolean('is_renewal') ? 'Perpanjang Sewa' : 'Permintaan Sewa Baru';
+        $messageNotif = "Ada " . strtolower($title) . " di {$propertyName} dari " . $request->user()->name . ".";
+
+        if ($ownerId) {
+            \App\Models\Notification::create([
+                'user_id' => $ownerId,
+                'title'   => $title,
+                'message' => $messageNotif,
+                'type'    => 'booking',
+                'data'    => ['rental_request_id' => $rentalRequest->id],
+            ]);
+
+            $owner = \App\Models\User::find($ownerId);
+            if ($owner && $owner->fcm_token) {
+                \App\Services\FCMService::send(
+                    $owner->fcm_token,
+                    $title,
+                    $messageNotif,
+                    [
+                        'type' => 'booking',
+                        'rental_request_id' => (string) $rentalRequest->id,
+                    ]
+                );
+            }
+        }
+
         if ($request->boolean('is_renewal')) {
             $roomType   = $rentalRequest->roomType;
             $total      = $roomType->price * $rentalRequest->duration_value;

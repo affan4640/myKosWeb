@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\ComplaintController;
 use App\Http\Controllers\Api\InvoiceController;
+use App\Http\Controllers\Api\NotificationController;
 
 Route::get('/auth/google/mobile', [AuthController::class, 'redirectToGoogle']);
 Route::get('/auth/google/mobile/callback', [AuthController::class, 'handleGoogleCallback']);
@@ -60,4 +61,14 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/invoices/create',[PaymentController::class, 'createInvoice']);
     Route::post('/invoices/{id}/mark-paid', [PaymentController::class, 'markPaid']);
+
+    // Notifikasi
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::post('/notifications/read', [NotificationController::class, 'markAllAsRead']);
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+    Route::delete('/notifications/{id}', [NotificationController::class, 'destroy']);
+
+    // FCM Token
+    Route::post('/fcm-token', [NotificationController::class, 'storeFcmToken']);
 });
+
