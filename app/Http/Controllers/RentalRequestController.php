@@ -6,11 +6,12 @@ use App\Models\Contract;
 use App\Models\Invoice;
 use App\Models\Property;
 use App\Models\RentalRequest;
+use App\Models\Notification;
+use App\Services\FCMService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
-use App\Models\Notification;
 
 class RentalRequestController extends Controller
 {
@@ -108,7 +109,7 @@ class RentalRequestController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $rental = RentalRequest::findOrFail($id);
+        $rental = RentalRequest::with(['tenant', 'roomType.property'])->findOrFail($id);
         $status = $request->input('status');
 
         if ($rental->status === 'approved' || $rental->status === 'rejected') {
@@ -146,10 +147,58 @@ class RentalRequestController extends Controller
                 'due_date' => now()->addDay(),
                 'status' => 'unpaid'
             ]);
+
+            // Notifikasi ke tenant: booking disetujui
+            $propertyName = $rental->roomType->property->name ?? 'Kost';
+            Notification::create([
+                'user_id' => $rental->tenant_id,
+                'title'   => 'Pengajuan Disetujui',
+                'message' => "Pengajuan sewa kamu di {$propertyName} telah disetujui. Silakan lakukan pembayaran.",
+                'type'    => 'booking',
+                'data'    => ['rental_request_id' => $rental->id],
+            ]);
+
+            // Kirim FCM push ke tenant
+            $tenant = $rental->tenant;
+            if ($tenant && $tenant->fcm_token) {
+                FCMService::send(
+                    $tenant->fcm_token,
+                    'Pengajuan Disetujui',
+                    "Pengajuan sewa kamu di {$propertyName} telah disetujui.",
+                    [
+                        'type' => 'booking',
+                        'rental_request_id' => (string) $rental->id,
+                    ]
+                );
+            }
           }
 
           else if ($status === 'rejected') {
             $rental->update(['status' => 'rejected']);
+
+            // Notifikasi ke tenant: booking ditolak
+            $propertyName = $rental->roomType->property->name ?? 'Kost';
+            Notification::create([
+                'user_id' => $rental->tenant_id,
+                'title'   => 'Pengajuan Ditolak',
+                'message' => "Maaf, pengajuan sewa kamu di {$propertyName} ditolak oleh pemilik kost.",
+                'type'    => 'booking',
+                'data'    => ['rental_request_id' => $rental->id],
+            ]);
+
+            // Kirim FCM push ke tenant
+            $tenant = $rental->tenant;
+            if ($tenant && $tenant->fcm_token) {
+                FCMService::send(
+                    $tenant->fcm_token,
+                    'Pengajuan Ditolak',
+                    "Maaf, pengajuan sewa kamu di {$propertyName} ditolak.",
+                    [
+                        'type' => 'booking',
+                        'rental_request_id' => (string) $rental->id,
+                    ]
+                );
+            }
           }
         });
 
