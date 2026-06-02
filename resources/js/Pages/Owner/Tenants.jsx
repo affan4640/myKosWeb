@@ -5,8 +5,6 @@ import { usePage } from "@inertiajs/react";
 
 export default function Tenants({ tenants }) {
 
-    console.log(tenants);
-
     const { ownerProperties } = usePage().props;
 
     return(

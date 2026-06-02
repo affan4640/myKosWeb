@@ -124,16 +124,6 @@ const SidebarContent = ({ onClose }) => {
                 },
             ],
         },
-        {
-            title: "SYSTEM",
-            items: [
-                {
-                    name: "Settings",
-                    icon: Settings,
-                    href: "/owner/settings",
-                },
-            ],
-        },
     ];
 
     return (

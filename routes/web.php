@@ -321,6 +321,10 @@ Route::post('/messages/send', [
     Route::get('/payments/{id}', [
         OwnerPaymentController::class, 'index'
     ])->name('owner.payments');
+
+    Route::get('/payments/detail/{id}', [
+        OwnerPaymentController::class, 'show'
+    ])->name('owner.payments.detail');
 });
 
 Route::post('/admin/notifications/mark-all-read', function () {

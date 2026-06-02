@@ -195,7 +195,7 @@ export default function TablePayment({ payments }) {
                                     <td className="p-4">
                                         <div className="flex justify-end">
                                             <Link
-                                                href={`/owner/payments/${payment.id}`}
+                                                href={`/owner/payments/detail/${payment.id}`}
                                                 className="
                                                     inline-flex items-center gap-2
                                                     px-3 py-1.5 rounded-lg text-sm transition
