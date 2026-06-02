@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Owner;
 
 use App\Http\Controllers\Controller;
+use App\Models\Invoice;
 use App\Models\Payment;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -73,6 +74,28 @@ class OwnerPaymentController extends Controller
             'filters' => [
                 'search' => $request->search
             ]
+        ]);
+    }
+
+    public function show(string $paymentId)
+    {
+        $ownerId = auth()->id();
+
+        $payment = Payment::query()
+            ->whereHas(
+                'invoice.contract.roomType.property',
+                function ($query) use ($ownerId) {
+                    $query->where('owner_id', $ownerId);
+                }
+            )
+            ->with([
+                'invoice.contract.tenant',
+                'invoice.contract.roomType.property'
+            ])
+            ->findOrFail($paymentId);
+
+        return Inertia::render('Owner/PaymentDetail', [
+            'payment' => $payment
         ]);
     }
 }

@@ -77,8 +77,6 @@ const formatDuration = (rental) => {
 };
 
 export default function TableRental({ rentals = [] }) {
-
-    console.log(rentals);
     return (
         <div className="mt-8">
             <div

@@ -12,8 +12,6 @@ import {
 } from "lucide-react";
 
 export default function Messages({conversations}) {
-    // console.log(conversations);
-    
     return (
         <OwnerLayout>
             <div className="min-h-screen bg-background dark:bg-dark-bg p-6">
